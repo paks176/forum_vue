@@ -653,8 +653,8 @@ body {
 }
 
 .content {
-  display: none;
-  opacity: 0;
+  display: flex;
+  opacity: 1;
   flex-direction: column;
   transition: all 0.2s ease;
 }
