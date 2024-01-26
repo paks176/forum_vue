@@ -1,10 +1,13 @@
 <template>
   <div id="app">
     <Header/>
+    <BreadCrumbs/>
     <div class="container" id="page-container">
       <div class="content-wrapper">
         <div class="content">
-          <RouterView/>
+          <Transition name="fade">
+            <RouterView/>
+          </Transition>
         </div>
       </div>
     </div>
@@ -13,12 +16,13 @@
 
 <script>
 import Header from './components/Header.vue'
-//import AllCategories from './components/AllCategories.vue'
+import BreadCrumbs from './components/BreadCrumbs.vue'
 
 export default {
   name: 'App',
   components: {
     Header,
+    BreadCrumbs
   },
   data() {
     return {

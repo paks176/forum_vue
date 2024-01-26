@@ -1,12 +1,25 @@
 <template>
   <div>
-    <section v-for="item in this.getData.content" class="catalog-category" data-type="category" :key="item.id">
+    <section v-for="item in this.getData.content" class="catalog-category" :key="`category_` + item.id">
       <div class="catalog-category__content">
         <h2>
-          <router-link to="/subcontent" :id="item.id">{{ item.name }}</router-link>
+          <router-link
+              :to="{
+            path: 'category', 
+            name: 'SubContent', 
+            query: {id: item.id}, 
+            params: {breadCrumbName: item.name}
+          }" :id="item.id">{{ item.name }}</router-link>
         </h2>
         <h3>{{ item.description }}</h3>
-        <div class="subcategories-rendered"></div>
+        <div class="subcategories-rendered">
+          <ul v-if="item.childs.length > 0" class="subcategory-list-ul">
+            <li v-for="child in cutSubCategories(item.childs)" class="catalog-category__sub" :key="`subcategory_` + child.id">
+              <router-link :to="`/subcontent/subcategory_` + child.id" id="5">{{child.name}}</router-link>
+            </li>
+          </ul>
+          <p v-else class="aside-text">Внутри нет вложенных категорий</p>
+        </div>
       </div>
       <div class="catalog-category__link">
         <button class="tools-edit disabled" title="Редактировать категорию" id="adminTools">
@@ -34,7 +47,9 @@ export default {
   },
   methods: {
     ...mapActions(['sendRequest']),
-    
+    cutSubCategories(array) {
+      return array.slice(0, 3)
+    }
   },
   mounted() {
     const allCategoriesRequest = {

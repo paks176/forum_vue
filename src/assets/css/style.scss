@@ -235,9 +235,8 @@ body {
     padding: 30px 35px;
     display: flex;
     background-color: $main_green_transparent;
-    &:not(:last-child) {
-      margin-bottom: 25px;
-    }
+    margin-bottom: 25px;
+    
     &__content {
       width: 100%;
     }

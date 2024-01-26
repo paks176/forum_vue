@@ -18,7 +18,7 @@ export default new Vuex.Store({
         itemsList: [],
     },
     actions: {
-        sendRequest(context, { method, requestURL, headers, body } ) {
+        sendRequest(context, { method, requestURL, headers, body, stateTarget } ) {
             const resultURL = this.state.globals.siteName + requestURL
             return fetch(resultURL, {
                 method: method,
@@ -29,21 +29,31 @@ export default new Vuex.Store({
                     return response.json()
                 })
                 .then(data => {
-                    context.commit('setData', data)
+                    const setDataObj = {
+                        content: data,
+                        stateTarget: stateTarget,
+                    }
+                    context.commit('setData', setDataObj);
+                    return true;
                 })
                 .catch(error => {
-                    console.log('Error happened in request: ' + resultURL + '. Error text: ' + error)
+                    console.log('Error happened in request: ' + resultURL + '. Error text: ' + error);
+                    return false;
                 })
         }
     },
     mutations: {
-        setData(state, data) {
-            state.itemsList = data;
+        setData(state, {content, stateTarget}) {
+            if (!stateTarget) {
+                state.itemsList = content;
+            } else {
+                state[stateTarget] = content;
+            }
         }
     },
     getters: {
-        getData(state) {
-            return state.itemsList;
+        getData: (state) => (stateTarget) => {
+            return state[stateTarget];
         },
         getGlobals(state) {
             return state.globals;

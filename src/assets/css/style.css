@@ -622,8 +622,6 @@ body {
   padding: 30px 35px;
   display: flex;
   background-color: rgba(0, 169, 128, 0.26);
-}
-.catalog-sub-category:not(:last-child) {
   margin-bottom: 25px;
 }
 .catalog-sub-category__content {
