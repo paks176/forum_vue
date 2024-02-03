@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section v-for="item in this.getData.content" class="catalog-category" :key="`category_` + item.id">
+    <section v-for="item in this.mainPageItems.content" class="catalog-category" :key="`category_` + item.id">
       <div class="catalog-category__content">
         <h2>
           <router-link
@@ -41,6 +41,11 @@ import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "AllCategories",
+  data() {
+    return {
+      mainPageItems: [],
+    }
+  },
   computed: {
     ...mapGetters(['getData']),
     ...mapGetters(['getGlobals']),
@@ -56,9 +61,12 @@ export default {
       method: 'GET',
       requestURL: '/v1/categories',
       headers:  this.getGlobals.headers,
-      body: null,
+      stateTarget: 'main-page-categories'
     }
-    this.sendRequest(allCategoriesRequest);
+    this.sendRequest(allCategoriesRequest)
+        .then(() => {
+          this.mainPageItems = this.getData('main-page-categories')
+        });
   }
 }
 </script>

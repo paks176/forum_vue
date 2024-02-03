@@ -30,9 +30,9 @@ export default new Vuex.Store({
                 })
                 .then(data => {
                     const setDataObj = {
-                        content: data,
-                        stateTarget: stateTarget,
-                    }
+                        stateTarget,
+                        data,
+                    };
                     context.commit('setData', setDataObj);
                     return true;
                 })
@@ -43,17 +43,29 @@ export default new Vuex.Store({
         }
     },
     mutations: {
-        setData(state, {content, stateTarget}) {
-            if (!stateTarget) {
-                state.itemsList = content;
-            } else {
-                state[stateTarget] = content;
+        setData(state, {stateTarget, data}) {
+            let lastKeyIndex = stateTarget.length - 1;
+            for (let i = 0; i < lastKeyIndex; i++) {
+                let key = stateTarget[i];
+                if (!(key in state)) {
+                    state[key] = {}
+                }
+                state = state[key];
             }
+            state[stateTarget[lastKeyIndex]] = data.content ? data.content : data;
         }
     },
     getters: {
         getData: (state) => (stateTarget) => {
-            return state[stateTarget];
+            let i = 0;
+            let targetLevel = state[stateTarget[i]];
+            let nextLevel = stateTarget[i+1]
+            while (nextLevel) {
+                targetLevel = targetLevel[stateTarget[i+1]];
+                i++
+                nextLevel = stateTarget[i+1]
+            }
+            return targetLevel;
         },
         getGlobals(state) {
             return state.globals;
