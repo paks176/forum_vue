@@ -99,7 +99,6 @@ export default {
 
   data() {
     return {
-      subCategories: [],
       subClubs: [],
       subCategoryInnerContent: [],
     }
@@ -111,6 +110,9 @@ export default {
     },
     ...mapGetters(['getData']),
     ...mapGetters(['getGlobals']),
+    subCategories() {
+      return this.getData([`subContent-${this.currentQuery}_category-list`])
+    }
   },
 
   methods: {
