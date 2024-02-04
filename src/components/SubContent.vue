@@ -2,8 +2,6 @@
 
   <div>
     <!-- categories -->
-    <div v-if="subCategories">
-      <div v-if="subCategories.length > 0"></div>
       <section v-for="item in this.subCategories" class="catalog-sub-category" :id="`subcategory_` + item.id" :key="item.id">
         <div class="catalog-sub-category__content">
           <h2>
@@ -18,24 +16,22 @@
           </h2>
           <p class="catalog-sub-category__description">{{ item.description }}</p>
           
-          <div v-if="item.childs" class="rendered-list">
             <ul>
-              <li v-for="child in item.childs" :key="child.id" class="catalog-category__sub">
+              <li v-for="child in item.innerContent.processedInnerContent" :key="child.id" class="catalog-category__sub">
                 <router-link :to="{
-                  path: 'category', 
+                  path: `/subcontent/subcategory_` + child.id, 
                   name: 'SubContent', 
                   query: {id: child.id}, 
-                  params: {breadCrumbName: item.name}
+                  params: {breadCrumbName: child.name}
                 }"
                 >
                   {{ child.name }}
                 </router-link>
               </li>
             </ul>
-            
-          </div>
           
-          <div v-if="item.childs.length === 0">
+          
+          <div v-if="Object.keys(item.innerContent.processedInnerContent).length === 0">
             <p class="aside-text">Внутри нет вложенных категорий</p>
           </div>
           
@@ -51,16 +47,17 @@
           </button>
           <router-link
               :to="{
-            path: 'category', 
-            name: 'SubContent', 
-            query: {id: item.id}, 
-            params: {breadCrumbName: item.name}
-          }" :id="item.id">Подробнее
+                path: `/subcontent/subcategory_` + item.id, 
+                name: 'SubContent', 
+                query: {id: item.id}, 
+                params: {breadCrumbName: item.name}
+              }" 
+              :id="item.id"
+          >
+            Подробнее
           </router-link>
         </div>
       </section>
-    </div>
-
     <!--  clubs  -->
     <div v-if="subClubs.length > 0">
       <section v-for="club in subClubs" :key="club.id" class="club" :id="`club_` + club.id">
@@ -95,7 +92,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 
 export default {
   name: "SubContent",
@@ -104,7 +101,7 @@ export default {
     return {
       subCategories: [],
       subClubs: [],
-      subCategoryInnerContent: {},
+      subCategoryInnerContent: [],
     }
   },
 
@@ -118,59 +115,196 @@ export default {
 
   methods: {
     ...mapActions(['sendRequest']),
+    ...mapMutations(['setData']),
   },
 
   mounted() {
 
-    const subCategoriesRequest = {
+    const thisPageCategoriesRequest = {
       method: 'GET',
       requestURL: `/v1/categories?parent_id=${this.currentQuery}`,
       headers: this.getGlobals.headers,
       body: null,
       stateTarget: [`subContent-${this.currentQuery}_category-list`]
     }
+    
+    let queue;
+    
+    async function processInnerContent(i, keys, thisPageCategories, headers, query, sendRequest, getData, setData) {
+      if (thisPageCategories[keys[i]]) {
+        queue = new Promise(resolve => {
+          let innerContentPull = [];
 
-    // const subClubsRequest = {
-    //   method: 'GET',
-    //   requestURL: `/v1/clubs?category_id=${this.currentQuery}&expired=false`,
-    //   headers:  this.getGlobals.headers,
-    //   body: null,
-    //   stateTarget: [`subContent-${this.currentQuery}_clubs-list`,]
-    // }
+          const getSubCategoryInnerCategoriesRequest = {
+            method: 'GET',
+            requestURL: `/v1/categories?parent_id=${thisPageCategories[keys[i]].id}`,
+            headers: headers,
+            stateTarget: [`subContent-${query}_category-list`, thisPageCategories[keys[i]].id, 'innerContent', 'innerCategories'],
+          };
 
-    this.sendRequest(subCategoriesRequest) // запрос на все категории
+          const getSubCategoryInnerClubsRequest = {
+            method: 'GET',
+            requestURL: `/v1/clubs?category_id=${thisPageCategories[keys[i]].id}&expired=false`,
+            headers:  headers,
+            body: null,
+            stateTarget: [`subContent-${query}_category-list`, thisPageCategories[keys[i]].id, 'innerContent', 'innerClubs']
+          }
+
+          sendRequest(getSubCategoryInnerCategoriesRequest)
+              .then(() => {
+                thisPageCategories[keys[i]].innerContent.innerCategories = getData(
+                    [
+                      `subContent-${query}_category-list`,
+                      thisPageCategories[keys[i]].id,
+                      'innerContent',
+                      'innerCategories'
+                    ]);
+                sendRequest(getSubCategoryInnerClubsRequest)
+                    .then(() => {
+                      thisPageCategories[keys[i]].innerContent.innerClubs = getData(
+                          [
+                            `subContent-${query}_category-list`,
+                            thisPageCategories[keys[i]].id,
+                            'innerContent',
+                            'innerClubs'
+                          ]);
+                      const thisCategories = thisPageCategories[keys[i]].innerContent.innerCategories;
+                      const thisClubs = thisPageCategories[keys[i]].innerContent.innerClubs
+                      const categoriesLength = Object.keys(thisCategories).length;
+                      const clubsLength = Object.keys(thisClubs).length;
+
+                      if (categoriesLength > 0 && categoriesLength <= 3) {
+                        const catPush = Object.keys(thisCategories).slice(0, 2).reduce((result, key) => {
+                          result[key] = thisCategories[key];
+                          return result;
+                        }, {});
+                        for (let cat in catPush) {
+                          innerContentPull.push(catPush[cat]);
+                        }
+                      }
+
+                      if (innerContentPull.length < 3 && clubsLength > 0) {
+                        const clubsRequired = 3 - innerContentPull.length;
+                        const clubsPush = Object.keys(thisClubs).slice(0, clubsRequired).reduce((result, key) => {
+                          result[key] = thisClubs[key];
+                          return result;
+                        }, {});
+                        for (let club in clubsPush) {
+                          innerContentPull.push(clubsPush[club]);
+                        }
+                      }
+                      const setDataObj = {
+                        stateTarget: [
+                          `subContent-${query}_category-list`,
+                          thisPageCategories[keys[i]].id,
+                          'innerContent',
+                          'processedInnerContent'
+                        ],
+                        data: innerContentPull
+                      }
+                      setData(setDataObj);
+                      resolve();
+                    })
+              })
+        });
+        
+        queue.then(() => {
+          if (i < (Object.keys(thisPageCategories).length - 1)) {
+            i++;
+            processInnerContent(i, keys, thisPageCategories, headers, query, sendRequest, getData, setData)
+          } else return getData([`subContent-${query}_category-list`])
+        })
+      }
+    }
+
+    this.sendRequest(thisPageCategoriesRequest) // запрос на все категории
         .then(() => {
           const thisPageCategories = this.getData([`subContent-${this.currentQuery}_category-list`]);
-          for (let i = 0; i < thisPageCategories.length; i++) {
-            const getSubCategoryInnerCategoriesRequest = {
-              method: 'GET',
-              requestURL: `/v1/categories?parent_id=${thisPageCategories[i].id}`,
-              headers: this.getGlobals.headers,
-              stateTarget: [`subContent-${this.currentQuery}_category-list`, String(i), 'childs'],
-            };
-            this.sendRequest(getSubCategoryInnerCategoriesRequest)
-                .then(() => {
-                  thisPageCategories[i].childs = this.getData(
-                      [
-                        `subContent-${this.currentQuery}_category-list`,
-                        String(i),
-                        'childs'
-                      ]);
-                  if (thisPageCategories[i].childs.length > 3) {
-                    thisPageCategories[i].childs.length = 3;
-                  }
-                })
-
-          }
-        }).then(() => {
-          this.subCategories = this.getData([`subContent-${this.currentQuery}_category-list`]);
-    })
-
-    setTimeout(() => {
-      window.testState = this.$store.state
-      console.log(this.$store.state)
-    }, 500);
-
+          let i = 0;
+          let keys = Object.keys(thisPageCategories);
+          processInnerContent(i, keys, thisPageCategories, this.getGlobals.headers, this.currentQuery, this.sendRequest, this.getData, this.setData).then(() => {
+            this.subCategories = this.getData([`subContent-${this.currentQuery}_category-list`])
+            console.log(this.subCategories)
+          })
+          
+          // for (let key in thisPageCategories) {
+          //  
+          //   let innerContentPull = [];
+          // 
+          //   const getSubCategoryInnerCategoriesRequest = {
+          //     method: 'GET',
+          //     requestURL: `/v1/categories?parent_id=${thisPageCategories[key].id}`,
+          //     headers: this.getGlobals.headers,
+          //     stateTarget: [`subContent-${this.currentQuery}_category-list`, thisPageCategories[key].id, 'innerContent', 'innerCategories'],
+          //   };
+          //
+          //   const getSubCategoryInnerClubsRequest = {
+          //     method: 'GET',
+          //     requestURL: `/v1/clubs?category_id=${thisPageCategories[key].id}&expired=false`,
+          //     headers:  this.getGlobals.headers,
+          //     body: null,
+          //     stateTarget: [`subContent-${this.currentQuery}_category-list`, thisPageCategories[key].id, 'innerContent', 'innerClubs']
+          //   }
+          //  
+          //   this.sendRequest(getSubCategoryInnerCategoriesRequest)
+          //       .then(() => {
+          //         thisPageCategories[key].innerContent.innerCategories = this.getData(
+          //             [
+          //               `subContent-${this.currentQuery}_category-list`,
+          //               thisPageCategories[key].id,
+          //               'innerContent',
+          //                 'innerCategories'
+          //             ]);
+          //         this.sendRequest(getSubCategoryInnerClubsRequest)
+          //             .then(() => {
+          //               thisPageCategories[key].innerContent.innerClubs = this.getData(
+          //                   [
+          //                     `subContent-${this.currentQuery}_category-list`,
+          //                     thisPageCategories[key].id,
+          //                     'innerContent',
+          //                     'innerClubs'
+          //                   ]);
+          //               const thisCategories = thisPageCategories[key].innerContent.innerCategories;
+          //               const thisClubs = thisPageCategories[key].innerContent.innerClubs
+          //               const categoriesLength = Object.keys(thisCategories).length;
+          //               const clubsLength = Object.keys(thisClubs).length;
+          //
+          //               if (categoriesLength > 0 && categoriesLength <= 3) {
+          //                 const catPush = Object.keys(thisCategories).slice(0, 2).reduce((result, key) => {
+          //                   result[key] = thisCategories[key];
+          //                   return result;
+          //                 }, {});
+          //                 for (let cat in catPush) {
+          //                   innerContentPull.push(catPush[cat]);
+          //                 }
+          //               }
+          //
+          //               if (innerContentPull.length < 3 && clubsLength > 0) {
+          //                 const clubsRequired = 3 - innerContentPull.length;
+          //                 const clubsPush = Object.keys(thisClubs).slice(0, clubsRequired).reduce((result, key) => {
+          //                   result[key] = thisClubs[key];
+          //                   return result;
+          //                 }, {});
+          //                 for (let club in clubsPush) {
+          //                   innerContentPull.push(clubsPush[club]);
+          //                 }
+          //               }
+          //               const setDataObj = {
+          //                 stateTarget: [
+          //                   `subContent-${this.currentQuery}_category-list`,
+          //                   thisPageCategories[key].id,
+          //                   'innerContent',
+          //                   'processedInnerContent'
+          //                 ],
+          //                 data: innerContentPull
+          //               }
+          //               this.setData(setDataObj)
+          //               this.subCategories = this.getData([`subContent-${this.currentQuery}_category-list`]);
+          //             })
+          //       })
+          //  
+          // }
+        })
   },
 
   

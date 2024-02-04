@@ -18,7 +18,7 @@ export default new Vuex.Store({
         itemsList: [],
     },
     actions: {
-        sendRequest(context, { method, requestURL, headers, body, stateTarget } ) {
+        async sendRequest(context, { method, requestURL, headers, body, stateTarget } ) {
             const resultURL = this.state.globals.siteName + requestURL
             return fetch(resultURL, {
                 method: method,
@@ -52,7 +52,14 @@ export default new Vuex.Store({
                 }
                 state = state[key];
             }
-            state[stateTarget[lastKeyIndex]] = data.content ? data.content : data;
+            let resultContent = data.content ? data.content : data;
+            if (Array.isArray(resultContent)) {
+                resultContent = resultContent.reduce(
+                    (resultObject, currentLevel) => (
+                        {...resultObject, [currentLevel.id] : currentLevel} ), {}
+                )
+            }
+            state[stateTarget[lastKeyIndex]] = resultContent;
         }
     },
     getters: {
@@ -72,3 +79,5 @@ export default new Vuex.Store({
         }
     }
 })
+
+// 4 5 6 15 17
