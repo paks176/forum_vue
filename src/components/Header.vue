@@ -75,7 +75,6 @@
         </div>
 
         <div id="authButton"></div>
-
       </nav>
     </div>
   </header>

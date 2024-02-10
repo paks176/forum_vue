@@ -3,14 +3,24 @@ import Vue from 'vue';
 const routes = [
     {
         path: '/',
-        name: 'Все категории',
-        component: () => import('../components/AllCategories.vue')
+        redirect: {
+            path: '/main',
+            component: () => import('../components/AllCategories.vue'),
+        }
     },
     {
-        path: '/category',
-        name: 'SubContent',
-        component: () => import('../components/SubContent.vue')
+        path: '/main',
+        component: () => import('../components/AllCategories.vue'),
     },
+    {
+        path: '/subcategory_:id',
+        component: () => import('../components/SubContent.vue'),
+    },
+    {
+        path: '*',
+        component: () => import('../components/Page404.vue'),
+    }
+    
 ];
 
 import VueRouter from "vue-router";

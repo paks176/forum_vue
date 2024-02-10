@@ -6,11 +6,12 @@
       <div class="content-wrapper">
         <div class="content">
           <Transition name="fade">
-            <RouterView/>
+            <router-view :key="this.$route.path"></router-view>
           </Transition>
         </div>
       </div>
     </div>
+    
   </div>
 </template>
 
@@ -22,7 +23,7 @@ export default {
   name: 'App',
   components: {
     Header,
-    BreadCrumbs
+    BreadCrumbs,
   },
   data() {
     return {

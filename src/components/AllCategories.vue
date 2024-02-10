@@ -1,21 +1,17 @@
 <template>
   <div>
-    <section v-for="item in this.mainPageItems.content" class="catalog-category" :key="`category_` + item.id">
+    <section v-for="item in this.mainPageItems" class="catalog-category" :key="`category_` + item.id">
       <div class="catalog-category__content">
         <h2>
-          <router-link
-              :to="{
-            path: 'category', 
-            name: 'SubContent', 
-            query: {id: item.id}, 
-            params: {breadCrumbName: item.name}
-          }" :id="item.id">{{ item.name }}</router-link>
+          <router-link :to="`subcategory_${item.id}`">
+              {{ item.name }}
+          </router-link>
         </h2>
         <h3>{{ item.description }}</h3>
         <div class="subcategories-rendered">
           <ul v-if="item.childs.length > 0" class="subcategory-list-ul">
             <li v-for="child in cutSubCategories(item.childs)" class="catalog-category__sub" :key="`subcategory_` + child.id">
-              <router-link :to="`/subcontent/subcategory_` + child.id" id="5">{{child.name}}</router-link>
+              <router-link to="/subcategory" id="5">{{child.name}}</router-link>
             </li>
           </ul>
           <p v-else class="aside-text">Внутри нет вложенных категорий</p>
@@ -31,6 +27,7 @@
         </button>
         <router-link to="/subcontent" :id="item.id">Подробнее</router-link>
       </div>
+<!--      <router-view></router-view>-->
     </section>
   </div>
   
@@ -61,11 +58,11 @@ export default {
       method: 'GET',
       requestURL: '/v1/categories',
       headers:  this.getGlobals.headers,
-      stateTarget: 'main-page-categories'
+      stateTarget: ['main-page-categories'],
     }
     this.sendRequest(allCategoriesRequest)
         .then(() => {
-          this.mainPageItems = this.getData('main-page-categories')
+          this.mainPageItems = this.getData(['main-page-categories'])
         });
   }
 }
