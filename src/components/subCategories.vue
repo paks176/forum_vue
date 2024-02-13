@@ -12,7 +12,7 @@
           <ul>
             <li v-for="child in item.innerContent.processedInnerContent" :key="child.id"
                 :class="`catalog-category__` + (child.type==='category' ? 'sub' : 'club')">
-              <router-link :to="`subcategory_${child.id}`">
+              <router-link :to="`${child.type==='category' ? 'subcategory_' + child.id : 'clubpage_'+  child.id}`" >
                 {{ child.name }}
               </router-link>
             </li>
@@ -94,7 +94,6 @@ export default {
           Object.assign(thisPageCategories, this.getData([`subContent-${this.currentId}_category-list`]));
 
           if (Object.keys(thisPageCategories).length === 0) {
-            console.log(thisPageCategories)
             this.$emit('emptyList')
           } else {
             for (let key in thisPageCategories) {

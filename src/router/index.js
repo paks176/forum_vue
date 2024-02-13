@@ -17,6 +17,10 @@ const routes = [
         component: () => import('../components/SubContent.vue'),
     },
     {
+        path: '/clubpage_:id',
+        component: () => import('../components/ClubPage.vue'),
+    },
+    {
         path: '*',
         component: () => import('../components/Page404.vue'),
     }

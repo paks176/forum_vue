@@ -24,19 +24,13 @@ export default {
   components: {
     Header,
     BreadCrumbs,
-  },
-  data() {
-    return {
-    }
-  },
-  mounted() {
   }
 }
 </script>
 
 <style>
 .fade-enter-active, .fade-leave-active {
-  display: block;
+  display: flex;
   transition: opacity .3s;
 }
 .fade-enter, .fade-leave-to {

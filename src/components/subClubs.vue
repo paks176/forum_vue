@@ -44,7 +44,6 @@ export default {
   data() {
     return {
       subClubs: {},
-      promises: 0,
     }
   },
 
