@@ -11,6 +11,7 @@ export default new Vuex.Store({
                 'Content-Type': 'application/json',
                 'accept': '*/*',
                 'mode': 'cors',
+                'credentials': 'include',
                 'Access-Control-Allow-Origin': '*'
             },
             
@@ -40,7 +41,7 @@ export default new Vuex.Store({
                     console.log('Error happened in request: ' + resultURL + '. Error text: ' + error);
                     return false;
                 })
-        }
+        },
     },
     mutations: {
         setData(state, {stateTarget, data}) {
@@ -78,6 +79,4 @@ export default new Vuex.Store({
             return state.globals;
         }
     }
-})
-
-// 4 5 6 15 17
+});

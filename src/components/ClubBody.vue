@@ -1,84 +1,80 @@
 <template>
-  <div class="theme-content__top">
+  <div v-if="clubPageData.content" class="theme-content__top">
     <section class="project-theme">
-      <div class="user">
-        <div class="user__avatar">
-          <p>${clubPageData.author.avatar}</p>
-        </div>
-        <h3 class="user__nickname">${clubPageData.author.nick}</h3>
-        <p class="aside-text">${clubPageData.author.role}</p>
-      </div>
-      <div class="project-theme__body">
-        <div>
-          <div class="project-theme__body--header">
+          <div class="user">
+            <div class="user__avatar">
+              <p>{{clubPageData.content.author.avatar}}</p>
+            </div>
+            <h3 class="user__nickname">{{clubPageData.content.author.nick}}</h3>
+            <p class="aside-text">{{clubPageData.content.author.role}}</p>
+          </div>
+          <div class="project-theme__body">
             <div>
-              <h2>${clubPageData.clubContent.header}</h2>
+              <div class="project-theme__body--header">
+                <div>
+                  <h2>{{clubPageData.content.clubContent.header}}</h2>
+                </div>
+              </div>
+              <div class="project-theme__body--text">
+                <p>{{clubPageData.content.clubContent.description}}</p>
+              </div>
+            </div>
+
+            <div class="aside-text">
+              {{((clubPageData.content.clubContent.created).split(' ')[0]).replaceAll(':', '.')}}
+            </div>
+            <div class="project-images" style="display: none;">
+              <button class="button-dark">
+                РџРѕРєР°Р·Р°С‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+              </button>
+              <div class="project-images__container">
+              </div>
             </div>
           </div>
-          <div class="project-theme__body--text">
-            <p>${clubPageData.clubContent.description}</p>
-          </div>
-        </div>
-
-        <div class="aside-text">
-          ${clubPageData.clubContent.created}
-        </div>
-        <div class="project-images" style="display: none;">
-          <button class="button-dark">
-            Показать изображения
-          </button>
-          <div class="project-images__container">
-          </div>
-        </div>
-      </div>
-    </section>
+        </section>
     <section class="sidebar">
-      <div class="project-info">
-        <div class="project-info__header">
-          <h5>Информация о складчине</h5>
-          <p class="text-light">Активна:</p>
-          <p class="aside-text">${clubPageData.clubInfo.notExpired}</p>
-          <p class="text-light">Когда закроется:</p>
-          <p class="aside-text">${clubPageData.clubInfo.expireCondition}</p>
-        </div>
-        <div class="project-info__body">
-          <div class="project-info__item">
-            <p>Вход</p>
-            <div>
-              ${getEntryCost(clubPageData)}
+          <div class="project-info">
+            <div class="project-info__header">
+              <h5>РРЅС„РѕСЂРјР°С†РёСЏ Рѕ СЃРєР»Р°РґС‡РёРЅРµ</h5>
+              <p class="text-light">РђРєС‚РёРІРЅР°:</p>
+              <p class="aside-text">{{clubPageData.content.clubInfo.notExpired}}</p>
+              <p class="text-light">РљРѕРіРґР° Р·Р°РєСЂРѕРµС‚СЃСЏ:</p>
+              <p class="aside-text">{{clubPageData.content.clubInfo.expireCondition}}</p>
             </div>
-          </div>
-          <div class="project-info__item">
-            <p>Целевая сумма</p>
-            <div>
-              ${getCertificateCost(clubPageData)}
+            <div class="project-info__body">
+              <div class="project-info__item">
+                <p>Р’С…РѕРґ</p>
+                <div>
+    <!--              {{getEntryCost.content(clubPageData)}-->
+                </div>
+              </div>
+              <div class="project-info__item">
+                <p>Р¦РµР»РµРІР°СЏ СЃСѓРјРјР°</p>
+                <div v-html="getCertificateCost(clubPageData.content)">
+                </div>
+              </div>
+              <div class="project-info__item">
+                <p>РЎРѕР·РґР°РЅРѕ</p>
+                <p>{{((clubPageData.content.clubContent.created).split(' ')[0]).replaceAll(':', '.')}}</p>
+              </div>
             </div>
-          </div>
-          <div class="project-info__item">
-            <p>Создано</p>
-            <p>${clubPageData.clubContent.created}</p>
-          </div>
-        </div>
 
-      </div>
-      <!--     enter club button      -->
-      <div class="project-info">
-        <button id="paymentsLink"
-                class="status-button not-active ${clubPageData.thisUser.paymentsLinkStatus} ${clubPageData.thisUser.buttonStatus}"
-                data-club-id="${clubPageData.clubInfo.clubID}"
-                style="margin-bottom: 15px">
-          ${clubPageData.thisUser.enterButtonText}
-        </button>
-        <p class="project-message" >${clubPageData.thisUser.enterMessage}</p>
-      </div>
-      <!--     / enter club button      -->
+          </div>
+          <!--     enter club button      -->
+          <div class="project-info">
+            <button id="paymentsLink" class="status-button" data-club-id="${clubPageData.clubInfo.clubID}" style="margin-bottom: 15px">
+            </button>
+            <p class="project-message" >clubPageData.content.thisUser.enterMessage</p>
+          </div>
+          <!--     / enter club button      -->
 
-    </section>
+        </section>
   </div>
 </template>
 
 <script>
 import {mapActions, mapGetters, mapMutations} from "vuex";
+
 export default {
   name: "ClubBody",
   props: {
@@ -99,8 +95,53 @@ export default {
   methods: {
     ...mapActions(['sendRequest']),
     ...mapMutations(['setData']),
+    getUserRole(role) {
+      switch (role) {
+        case 'PARTNER':
+          return {
+            text: 'РџР°СЂС‚РЅРµСЂ',
+            color: '#c99f13'
+          }
+        case 'ADMIN':
+          return {
+            text: 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ',
+            color: 'rgb(200 80 72)'
+          }
+        case 'USER':
+          return {
+            text: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
+            color: 'rgb(0 110 169)'
+          }
+      }
+    },
+    checkDiscounts(clubContent) {
+      let discounts = {}
+      if (clubContent.costInfo.discountCertificateCost !== null) {
+        discounts.discountCertificateCost = clubContent.costInfo.discountCertificateCost + ' в‚Ѕ'
+      } else {
+        discounts.discountCertificateCost = ''
+      }
+      if (clubContent.costInfo.discountEntryCost !== null) {
+        discounts.discountEntryCost = clubContent.costInfo.discountEntryCost + ' в‚Ѕ'
+      } else {
+        discounts.discountEntryCost = ''
+      }
+      return discounts
+    },
+    getCertificateCost(clubPageData) {
+      if (!clubPageData.clubInfo.discountCertificateCost) {
+        return `
+            <p>${clubPageData.clubInfo.certificateCost} в‚Ѕ</p>
+        `
+      } else {
+        return `
+            <p class="old-price text-light"> ${clubPageData.clubInfo.certificateCost} в‚Ѕ</p>
+            <p>${clubPageData.clubInfo.discountCertificateCost}</p>
+        `
+      }
+    }
   },
-  mounted() {
+  created() {
     const clubRequest = {
       method: 'GET',
       requestURL: `/v1/club/${this.clubId}`,
@@ -108,9 +149,66 @@ export default {
       body: null,
       stateTarget: [`club-${this.clubId}_content`]
     };
-    this.sendRequest(clubRequest).then(() => {
-      this.$set(this.clubPageData, 'content', this.getData([`club-${this.clubId}_content`]))
-    })
+    let responseClubData = {
+      author: {},
+      clubContent: {},
+      clubInfo: {},
+      thisUser: {}
+    };
+    let mutatedClubData = {
+      author: {},
+      clubContent: {},
+      clubInfo: {},
+      thisUser: {}
+    }
+    this.sendRequest(clubRequest)
+        .then(() => {
+          Object.assign(responseClubData, this.getData([`club-${this.clubId}_content`]));
+          // getting author info
+          console.log(responseClubData)
+          const authorRequest = {
+            method: 'GET',
+            requestURL: `/v1/account/${responseClubData.authorId}`,
+            headers: this.getGlobals.headers,
+            body: null,
+            stateTarget: [`club-${this.clubId}_content`, 'author']
+          };
+          this.sendRequest(authorRequest)
+              .then(() => {
+                const thisAuthor = this.getData([`club-${this.clubId}_content`, 'author']);
+
+                mutatedClubData.author.avatar = (thisAuthor.email.slice(0, 1)).toUpperCase();
+                mutatedClubData.author.nick = thisAuthor.email;
+                mutatedClubData.author.role = this.getUserRole(thisAuthor.role).text;
+                // getting club content
+                mutatedClubData.clubContent.header = responseClubData.name;
+                mutatedClubData.clubContent.description = responseClubData.description;
+                mutatedClubData.clubContent.created = responseClubData.created;
+                mutatedClubData.clubContent.clubID = responseClubData.id;
+                console.log(mutatedClubData);
+
+                const participantsRequest = {
+                  method: 'GET',
+                  requestURL: `/v1/club/${this.clubId}/count`,
+                  headers: this.getGlobals.headers,
+                  body: null,
+                  stateTarget: [`club-${this.clubId}_content`, 'participantsCount']
+                }
+                this.sendRequest(participantsRequest)
+                    .then(() => {
+                      mutatedClubData.clubInfo.clubID = responseClubData.id;
+                      mutatedClubData.clubInfo.participants = this.getData([`club-${this.clubId}_content`, 'participantsCount']);
+                      mutatedClubData.clubInfo.expireCondition = responseClubData.activeInfo.expireCondition;
+                      mutatedClubData.clubInfo.notExpired = responseClubData.activeInfo.expired ? 'Р”Р°' : 'РќРµС‚';
+                      mutatedClubData.clubInfo.certificateCost = responseClubData.costInfo.certificateCost;
+                      mutatedClubData.clubInfo.entryCost = responseClubData.costInfo.entryCost;
+                      const discounts = this.checkDiscounts(responseClubData);
+                      mutatedClubData.clubInfo.discountCertificateCost = discounts.discountCertificateCost;
+                      mutatedClubData.clubInfo.discountEntryCost = discounts.discountEntryCost;
+                      this.$set(this.clubPageData, 'content', mutatedClubData);
+                    })
+                })
+        })
   }
 }
 </script>
