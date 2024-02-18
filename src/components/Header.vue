@@ -71,19 +71,25 @@
           </a></li>
         </ul>
 
-        <div id="user-info" class="header__user">
+        <div id="user-info" class="header__user"></div>
+        
+        <div v-if="!getLoginStatus">
+          <router-link to="/login" id="authButton">Войти</router-link>
         </div>
-
-        <div id="authButton"></div>
+        
       </nav>
     </div>
   </header>
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: "Header"
+  name: "Header",
+  computed: {
+    ...mapGetters(['getLoginStatus'])
+  }
 }
 </script>
 

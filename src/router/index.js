@@ -21,6 +21,10 @@ const routes = [
         component: () => import('../components/ClubPage.vue'),
     },
     {
+        path: '/login',
+        component: () => import('../components/AuthPage.vue')
+    },
+    {
         path: '*',
         component: () => import('../components/Page404.vue'),
     }

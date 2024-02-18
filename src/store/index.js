@@ -5,6 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
+        isLogged: false,
         globals: {
             siteName: 'http://localhost:8081',
             headers: {
@@ -19,7 +20,7 @@ export default new Vuex.Store({
         itemsList: [],
     },
     actions: {
-        async sendRequest(context, { method, requestURL, headers, body, stateTarget } ) {
+        async sendRequest(context, {method, requestURL, headers, body, stateTarget}) {
             const resultURL = this.state.globals.siteName + requestURL
             return fetch(resultURL, {
                 method: method,
@@ -42,6 +43,27 @@ export default new Vuex.Store({
                     return false;
                 })
         },
+        async logIn(context, data) {
+            fetch(`${this.state.globals.siteName}/login?`, {
+                'method': 'POST',
+                'body': data,
+                'credentials': 'include',
+                'mode': 'cors',
+                headers: {
+                    'accept': '*/*',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    context.commit('setLogInStatus', true);
+                    console.log('login success')
+                }
+                if (response.status === 401) {
+                    context.commit('setLogInStatus', false);
+                    console.log('login failed')
+                }
+            }).catch(err => console.log('Error in login request: ' + err))
+        },
     },
     mutations: {
         setData(state, {stateTarget, data}) {
@@ -61,22 +83,29 @@ export default new Vuex.Store({
                 )
             }
             state[stateTarget[lastKeyIndex]] = resultContent;
+        },
+        
+        setLogInStatus(state, status) {
+            state.isLogged = status;
         }
     },
     getters: {
         getData: (state) => (stateTarget) => {
             let i = 0;
             let targetLevel = state[stateTarget[i]];
-            let nextLevel = stateTarget[i+1]
+            let nextLevel = stateTarget[i + 1]
             while (nextLevel) {
-                targetLevel = targetLevel[stateTarget[i+1]];
+                targetLevel = targetLevel[stateTarget[i + 1]];
                 i++
-                nextLevel = stateTarget[i+1]
+                nextLevel = stateTarget[i + 1]
             }
             return targetLevel;
         },
         getGlobals(state) {
             return state.globals;
-        }
+        },
+        getLoginStatus(state) {
+            return state.isLogged;
+        },
     }
 });
