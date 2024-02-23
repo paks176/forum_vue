@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+// import router from "@/router";
 
 Vue.use(Vuex);
 
@@ -15,7 +16,7 @@ export default new Vuex.Store({
                 'credentials': 'include',
                 'Access-Control-Allow-Origin': '*'
             },
-            
+
         },
         itemsList: [],
     },
@@ -43,8 +44,8 @@ export default new Vuex.Store({
                     return false;
                 })
         },
-        async logIn(context, data) {
-            fetch(`${this.state.globals.siteName}/login?`, {
+        logIn(context, data) {
+            return fetch(`${this.state.globals.siteName}/login`, {
                 'method': 'POST',
                 'body': data,
                 'credentials': 'include',
@@ -56,11 +57,11 @@ export default new Vuex.Store({
             }).then(response => {
                 if (response.ok) {
                     context.commit('setLogInStatus', true);
-                    console.log('login success')
+                    console.log('login success');
                 }
                 if (response.status === 401) {
                     context.commit('setLogInStatus', false);
-                    console.log('login failed')
+                    console.log('login failed');
                 }
             }).catch(err => console.log('Error in login request: ' + err))
         },
@@ -79,12 +80,12 @@ export default new Vuex.Store({
             if (Array.isArray(resultContent)) {
                 resultContent = resultContent.reduce(
                     (resultObject, currentLevel) => (
-                        {...resultObject, [currentLevel.id] : currentLevel} ), {}
+                        {...resultObject, [currentLevel.id]: currentLevel}), {}
                 )
             }
             state[stateTarget[lastKeyIndex]] = resultContent;
         },
-        
+
         setLogInStatus(state, status) {
             state.isLogged = status;
         }
@@ -107,5 +108,18 @@ export default new Vuex.Store({
         getLoginStatus(state) {
             return state.isLogged;
         },
+    },
+
+    position: {
+        level: {
+            type: 'category',
+            id: 1,
+            name: 'Одежда и обувь',
+            level: {
+                type: 'category',
+                id: 3,
+                name: 'Верхняя одежда',
+            }
+        }
     }
 });

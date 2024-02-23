@@ -5,8 +5,8 @@
         <img src="../assets/img/authlogo.svg" alt="">
       </div>
       <form id="loginForm">
-        <input id="loginName" type="text" placeholder="Введите почту">
-        <input id="loginPassword" type="text" placeholder="Введите пароль">
+        <input id="loginName" type="text" placeholder="Введите почту" v-model="login">
+        <input id="loginPassword" type="text" placeholder="Введите пароль" v-model="password">
         <a href="#">Забыли пароль?</a>
         <button type="submit" class="bright-button" style="margin-top: 32px" id="loginButton" @click="logInPress">Вход</button>
       </form>
@@ -30,16 +30,20 @@ export default {
       password: '',
     }
   },
+  watch: {
+    
+  },
   methods: {
     ...mapActions(['logIn']),
     logInPress() {
       event.preventDefault();
-      const loginData = {
-        'username': this.login,
-        'password': this.password
-      };
-      this.logIn(loginData).then(() => {
-        if (this.getLoginStatus) {
+      const data = new FormData();
+      const userName = this.login;
+      const password = this.password;
+      data.append('username', userName)
+      data.append('password', password)
+      this.logIn(data).then(() => {
+        if (this.getLoginStatus === true) {
           router.push('/')
         }
       })

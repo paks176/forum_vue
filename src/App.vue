@@ -30,8 +30,8 @@ export default {
 
 <style>
 .fade-enter-active, .fade-leave-active {
-  display: flex;
-  transition: opacity .3s;
+  display: block;
+  transition: opacity 0.2s;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
