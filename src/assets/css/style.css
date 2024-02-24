@@ -150,6 +150,26 @@ main {
   display: none;
 }
 
+.animation {
+  transition: all 0.5s ease-out;
+}
+
+.opacity100 {
+  opacity: 100% !important;
+}
+
+.error-text {
+  color: #981818;
+}
+
+.error-field {
+  outline: 4px solid #d06666;
+}
+
+.bold-text {
+  font-weight: 600;
+}
+
 .payments-link {
   font-weight: 600;
   font-size: 12px;
@@ -277,6 +297,11 @@ main {
   text-align: center !important;
 }
 
+.appear-animation {
+  animation-name: appear;
+  animation-duration: 0.5s;
+}
+
 .lds-roller {
   display: inline-block;
   position: relative;
@@ -388,6 +413,14 @@ main {
   100% {
     box-shadow: 0 4px 16px rgba(0, 56, 43, 0.1);
     outline: 3px solid transparent;
+  }
+}
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 100%;
   }
 }
 /* Header */

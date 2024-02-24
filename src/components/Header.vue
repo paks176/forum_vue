@@ -76,6 +76,9 @@
         <div v-if="!getLoginStatus">
           <router-link to="/login" id="authButton" class="user__button">Войти</router-link>
         </div>
+        <div v-else>
+          <router-link to="/login" id="authButton" class="user__button">Выйти</router-link>
+        </div>
         
       </nav>
     </div>

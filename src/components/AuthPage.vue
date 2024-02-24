@@ -5,14 +5,14 @@
         <img src="../assets/img/authlogo.svg" alt="">
       </div>
       <form id="loginForm">
-        <input id="loginName" type="text" placeholder="Введите почту" v-model="login">
-        <input id="loginPassword" type="text" placeholder="Введите пароль" v-model="password">
+        <input id="loginName" type="text" required placeholder="Введите почту" v-model="login">
+        <input id="loginPassword" type="text" required placeholder="Введите пароль" v-model="password">
         <a href="#">Забыли пароль?</a>
         <button type="submit" class="bright-button" style="margin-top: 32px" id="loginButton" @click="logInPress">Вход</button>
       </form>
     </section>
-    <div class="auth-message">
-      <p></p>
+    <div class="auth-message animation" :class="{ opacity100:  showMessage}">
+        <p class="bold-text" :class="{'error-text': wrong}">{{message}}</p>
     </div>
   </div>
 </template>
@@ -28,29 +28,46 @@ export default {
     return {
       login: '',
       password: '',
+      message: '',
+      showMessage: false,
+      wrong: false,
     }
-  },
-  watch: {
-    
   },
   methods: {
     ...mapActions(['logIn']),
     logInPress() {
-      event.preventDefault();
-      const data = new FormData();
-      const userName = this.login;
-      const password = this.password;
-      data.append('username', userName)
-      data.append('password', password)
-      this.logIn(data).then(() => {
-        if (this.getLoginStatus === true) {
-          router.push('/')
-        }
-      })
+      if (this.$validateForm(this.$el.querySelector('form'))) {
+        event.preventDefault();
+        const data = new FormData();
+        const userName = this.login;
+        const password = this.password;
+        data.append('username', userName);
+        data.append('password', password);
+        this.logIn(data).then(() => {
+          if (this.getLoginStatus === true) {
+            this.wrong = false;
+            this.message = 'Успешный вход';
+            this.showMessage = true;
+            setTimeout(() => {
+              this.showMessage = false;
+            }, 1400)
+            setTimeout(() => {
+              router.push('/');
+            }, 2000)
+          } else {
+            this.wrong = true;
+            this.message = 'Неверные логин или пароль';
+            this.showMessage = true;
+            setTimeout(() => {
+              this.showMessage = false;
+            }, 3000)
+          }
+        })
+      }
     },
   },
   computed: {
-    ...mapGetters(['getLoginStatus'])
+    ...mapGetters(['getLoginStatus']),
   }
 }
 </script>

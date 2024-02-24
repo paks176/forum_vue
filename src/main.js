@@ -8,6 +8,10 @@ import router from './router/index';
 
 Vue.config.productionTip = false;
 
+// plugins
+import validateForm from '@/plugins/validateForm';
+Vue.use(validateForm)
+
 window.vue = new Vue({
   store: Store,
   router,
