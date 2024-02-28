@@ -64,7 +64,7 @@
           <div class="project-info">
             <button id="paymentsLink" class="status-button" data-club-id="${clubPageData.clubInfo.clubID}" style="margin-bottom: 15px">
             </button>
-            <p class="project-message" >clubPageData.content.thisUser.enterMessage</p>
+            <p class="project-message">clubPageData.content.thisUser.enterMessage</p>
           </div>
           <!--     / enter club button      -->
 

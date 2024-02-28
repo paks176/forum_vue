@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import Store from '@/store/index'
 
 const routes = [
     {
@@ -38,6 +39,10 @@ const router = new VueRouter({
 });
 
 // ToDo Добавить хук beforeEach для проверики аторизации
+router.beforeEach((to, from, next) => {
+    Store.dispatch('getInfoAboutMe')
+        .then(() => {next()})
+    })
 
 Vue.use(VueRouter);
 
