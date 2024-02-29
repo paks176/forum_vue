@@ -73,7 +73,7 @@
 
         <div id="user-info" class="header__user"></div>
         
-        <div v-if="!getLoginStatus">
+        <div v-if="getUserInfo.isLogged === false">
           <router-link to="/login" id="authButton" class="user__button">Войти</router-link>
         </div>
         <div v-else>
@@ -91,7 +91,12 @@ export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Header",
   computed: {
-    ...mapGetters(['getLoginStatus'])
+    ...mapGetters(['getUserInfo'])
+  },
+  watch: {
+    getUserInfo() {
+      console.log(this.getUserInfo)
+    }
   }
 }
 </script>

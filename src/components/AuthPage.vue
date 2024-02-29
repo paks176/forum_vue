@@ -44,7 +44,9 @@ export default {
         data.append('username', userName);
         data.append('password', password);
         this.logIn(data).then(() => {
-          if (this.getLoginStatus === true) {
+          console.log("getUserInfo: ")
+          console.log(this.getUserInfo)
+          if (this.getUserInfo.isLogged === true) {
             this.wrong = false;
             this.message = 'Успешный вход';
             this.showMessage = true;
@@ -67,7 +69,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getLoginStatus']),
+    ...mapGetters(['getUserInfo']),
   }
 }
 </script>

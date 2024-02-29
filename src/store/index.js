@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-// import router from "@/router";
 
 Vue.use(Vuex);
 
@@ -28,7 +27,7 @@ export default new Vuex.Store({
         }
     },
     actions: {
-        async sendRequest(context, {method, requestURL, headers, body, stateTarget}) {
+        sendRequest(context, {method, requestURL, headers, body, stateTarget}) {
             const resultURL = this.state.globals.siteName + requestURL
             return fetch(resultURL, {
                 method: method,
@@ -60,14 +59,8 @@ export default new Vuex.Store({
                     'accept': '*/*',
                     'Access-Control-Allow-Origin': '*'
                 }
-            }).then(response => {
-                console.log(response)
-                if (response.ok) {
-                    context.commit('setLogInStatus', true);
-                }
-                if (response.status === 401) {
-                    context.commit('setLogInStatus', false);
-                }
+            }).then(() => {
+                return context.dispatch('getInfoAboutMe')
             }).catch(err => console.log('Error in login request: ' + err))
         },
         
@@ -75,7 +68,8 @@ export default new Vuex.Store({
             return fetch(`${this.state.globals.siteName}/v1/account/me`, 
                 {'credentials': 'include',})
                 .then(stream => {
-                    stream.json().then(result => {
+                    return stream.json()
+                        .then(result => {
                         if (result.status === 400) {
                             console.warn('Error with getting user info. Text of the error: ' + result.message);
                             const noLoginResult = {
@@ -86,12 +80,14 @@ export default new Vuex.Store({
                                 created: "",
                                 telegramNickname: null
                             }
-                            context.commit('setUserInfo', noLoginResult)
-                        } else context.commit('setUserInfo', result)
+                            context.commit('setUserInfo', noLoginResult);
+                        } else {
+                            result.isLogged = true;
+                            context.commit('setUserInfo', result);
+                        }
                     })
-                }).catch(error => {
-                    console.log(error.message)
                 })
+                .catch(error => {console.log(error.message)})
         }
     },
     mutations: {
@@ -113,17 +109,15 @@ export default new Vuex.Store({
             }
             state[stateTarget[lastKeyIndex]] = resultContent;
         },
-
-        setLogInStatus(state, status) {
-            state.isLogged = status;
-        },
         
         setUserInfo(state, data) {
-            state.thisUser.isLogged = true;
+            state.thisUser.isLogged = data.isLogged;
             state.thisUser.id = data.id;
             state.thisUser.role = data.role;
             state.thisUser.email = data.email;
             state.thisUser.telegramNickname = data.telegramNickname;
+            console.log('setUserInfo: ')
+            console.log(state.thisUser)
         }
     },
     getters: {
@@ -141,8 +135,8 @@ export default new Vuex.Store({
         getGlobals(state) {
             return state.globals;
         },
-        getLoginStatus(state) {
-            return state.thisUser.isLogged;
+        getUserInfo(state) {
+            return state.thisUser;
         },
     },
 
