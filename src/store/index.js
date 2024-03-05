@@ -14,7 +14,6 @@ export default new Vuex.Store({
                 'credentials': 'include',
                 'Access-Control-Allow-Origin': '*'
             },
-
         },
         itemsList: [],
         thisUser: {
@@ -36,15 +35,16 @@ export default new Vuex.Store({
             })
                 .then(response => {
                     return response.json()
+                        .then(data => {
+                            const setDataObj = {
+                                stateTarget,
+                                data,
+                            };
+                            context.commit('setData', setDataObj);
+                            return true;
+                        })
                 })
-                .then(data => {
-                    const setDataObj = {
-                        stateTarget,
-                        data,
-                    };
-                    context.commit('setData', setDataObj);
-                    return true;
-                })
+                
                 .catch(error => {
                     console.log('Error happened in request: ' + resultURL + '. Error text: ' + error);
                     return false;
@@ -88,6 +88,24 @@ export default new Vuex.Store({
                     })
                 })
                 .catch(error => {console.log(error.message)})
+        },
+        
+        getUserPayment(context, clubId) {
+            const clubPaymentRequest = {
+                method: 'GET',
+                requestURL: `/v1/club/${clubId}/payment`,
+                headers: context.state.headers,
+                stateTarget: [`club-${this.clubId}_content`, 'user_payment']
+            }
+            return context.dispatch('sendRequest', clubPaymentRequest)
+                    // {
+                    //     "id": null,
+                    //     "accountId": null,
+                    //     "paymentInfo": null,
+                    //     "status": null,
+                    //     "comment": null,
+                    //     "requisiteDTO": null
+                    // }
         }
     },
     mutations: {
@@ -116,8 +134,7 @@ export default new Vuex.Store({
             state.thisUser.role = data.role;
             state.thisUser.email = data.email;
             state.thisUser.telegramNickname = data.telegramNickname;
-            console.log('setUserInfo: ')
-            console.log(state.thisUser)
+            console.log('setUserInfo: ' + state.thisUser.email + ', ' + state.thisUser.role);
         }
     },
     getters: {

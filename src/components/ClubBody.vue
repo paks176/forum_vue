@@ -62,12 +62,23 @@
           </div>
           <!--     enter club button      -->
           <div class="project-info">
-            <button id="paymentsLink" class="status-button" data-club-id="${clubPageData.clubInfo.clubID}" style="margin-bottom: 15px">
-            </button>
-            <p class="project-message">clubPageData.content.thisUser.enterMessage</p>
+            <div v-if="getUserInfo.isLogged">
+              <button 
+                  class="status-button"
+                  :class="{[paymentButtonData.buttonStatusClass]: true}"
+                  v-if="paymentButtonData.enterButtonShow"
+                  :data-payment="{[paymentButtonData.paymentId]: true}"
+                  style="margin-bottom: 15px"
+              >
+                {{paymentButtonData.enterButtonText}}
+              </button>
+              <p class="project-message">{{paymentButtonData.enterMessage}}</p>
+            </div>
+            <div v-else>
+              <p class="project-message">Войдите в профиль или зарегистрируйтесь чтобы вступить</p>
+            </div>
           </div>
           <!--     / enter club button      -->
-
         </section>
   </div>
 </template>
@@ -85,15 +96,25 @@ export default {
   data() {
     return {
       clubPageData: {},
+      paymentButtonData: {
+        enterButtonShow: '',
+        enterButtonText: '',
+        enterMessage: '',
+        buttonStatusClass: '',
+        paymentsLinkStatus: '',
+        participation: '',
+        paymentId: '',
+      },
+      headers: '',
+      siteName: '',
     }
   },
   computed: {
-    ...mapGetters(['getGlobals']),
-    ...mapGetters(['getData']),
+    ...mapGetters(['getData', 'getUserInfo', 'getGlobals']),
   },
 
   methods: {
-    ...mapActions(['sendRequest']),
+    ...mapActions(['sendRequest', 'getUserPayment']),
     ...mapMutations(['setData']),
     getUserRole(role) {
       switch (role) {
@@ -139,9 +160,47 @@ export default {
             <p>${clubPageData.clubInfo.discountCertificateCost}</p>
         `
       }
+    },
+    definePaymentButtonStatus(payment) {
+      let result = {};
+      switch (payment.status) {
+        case 'NEW':
+          result.enterButtonShow = true
+          result.enterButtonText = 'Ожидает оплаты'
+          result.enterMessage = 'Платеж создан, ожидает вашей оплаты'
+          result.buttonStatusClass = 'waitingForUser'
+          result.paymentsLinkStatus = 'active'
+          result.participation = false
+          break
+        case 'CONFIRMED':
+          result.enterButtonShow = false
+          result.enterButtonText = 'Платеж подтвержден'
+          result.enterMessage = 'Платеж подтвержден, вы участник складчины'
+          result.buttonStatusClass = 'succeed'
+          result.paymentsLinkStatus = 'active'
+          result.participation = true
+          break
+        case 'SEND':
+          result.enterButtonShow = false
+          result.enterButtonText = 'Платеж отправлен'
+          result.enterMessage = 'Платеж отправлен, находится на проверке у модератора'
+          result.buttonStatusClass = 'waitingForCheck'
+          result.paymentsLinkStatus = ''
+          result.participation = false
+          break
+        default:
+          result.enterButtonShow = true
+          result.enterButtonText = 'Вступить'
+          result.enterMessage = 'Нажмите, чтобы создать платеж для вступления'
+          result.buttonStatusClass = 'active'
+          result.paymentsLinkStatus = 'active'
+          result.participation = false
+      }
+      this.paymentButtonData = result;
     }
   },
-  created() {
+  mounted() {
+    this.siteName = this.getGlobals.siteName;
     const clubRequest = {
       method: 'GET',
       requestURL: `/v1/club/${this.clubId}`,
@@ -164,8 +223,6 @@ export default {
     this.sendRequest(clubRequest)
         .then(() => {
           Object.assign(responseClubData, this.getData([`club-${this.clubId}_content`]));
-          // getting author info
-          console.log(responseClubData)
           const authorRequest = {
             method: 'GET',
             requestURL: `/v1/account/${responseClubData.authorId}`,
@@ -185,7 +242,6 @@ export default {
                 mutatedClubData.clubContent.description = responseClubData.description;
                 mutatedClubData.clubContent.created = responseClubData.created;
                 mutatedClubData.clubContent.clubID = responseClubData.id;
-                console.log(mutatedClubData);
 
                 const participantsRequest = {
                   method: 'GET',
@@ -206,7 +262,22 @@ export default {
                       mutatedClubData.clubInfo.discountCertificateCost = discounts.discountCertificateCost;
                       mutatedClubData.clubInfo.discountEntryCost = discounts.discountEntryCost;
                       this.$set(this.clubPageData, 'content', mutatedClubData);
-                    })
+                    }).then(() => {
+                        if (this.getUserInfo.isLogged) {
+                                fetch(this.getGlobals.siteName + `/v1/club/${this.clubId}/payment`, {
+                                  method: 'GET',
+                                  credentials: 'include',
+                                  headers: this.getGlobals.headers,
+                                }).then(response => {
+                                    response.json()
+                                        .then(data => {
+                                            console.log(data)
+                                            this.definePaymentButtonStatus(data)
+                                          })
+                                    })
+                                
+                        }
+                })
                 })
         })
   }
