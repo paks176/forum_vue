@@ -153,6 +153,9 @@ main {
     background-color: #137dc9;
     color: $main_white;
   }
+  &:hover {
+    filter: brightness(0.7);
+  }
 }
 .display-none {
   display: none;

@@ -26,6 +26,10 @@ const routes = [
         component: () => import('../components/AuthPage.vue')
     },
     {
+        path: '/payments/:action/:elementId',
+        component: () => import('../components/PaymentsPage.vue')
+    },
+    {
         path: '*',
         component: () => import('../components/Page404.vue'),
     }

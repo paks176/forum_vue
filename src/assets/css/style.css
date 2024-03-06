@@ -145,6 +145,9 @@ main {
   background-color: #137dc9;
   color: #FFFFFF;
 }
+.status-button:hover {
+  filter: brightness(0.7);
+}
 
 .display-none {
   display: none;
