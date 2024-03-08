@@ -10,7 +10,10 @@ Vue.config.productionTip = false;
 
 // plugins
 import validateForm from '@/plugins/validateForm';
-Vue.use(validateForm)
+import modal from '@/plugins/modal';
+
+Vue.use(validateForm);
+Vue.use(modal);
 
 window.vue = new Vue({
   store: Store,
