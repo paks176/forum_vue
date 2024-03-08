@@ -205,6 +205,9 @@ export default {
       }
       this.paymentButtonData = result;
     },
+    testMethod() {
+      console.log('test method')
+    },
     paymentAction() {
       const button = this.$el.querySelector('.status-button');
       if (button) {
@@ -297,6 +300,16 @@ export default {
                 })
                 })
         })
+    
+    const options = {
+      content: "<h2>Test</h2>",
+      action: {
+        display: 'block',
+        buttonText: 'Test method',
+        function: this.testMethod,
+      },
+    }
+    this.$modal.initModal(options);
   }
 }
 </script>
