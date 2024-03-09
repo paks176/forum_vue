@@ -45,12 +45,18 @@
               <div class="project-info__item">
                 <p>Вход</p>
                 <div>
-    <!--              {{getEntryCost.content(clubPageData)}-->
+                    <div v-if="clubPageData.content.clubInfo.discountEntryCost">
+                      <p class="old-price text-light"> {{ clubPageData.content.clubInfo.entryCost }} ₽</p>
+                      <p>{{ clubPageData.content.clubInfo.discountEntryCost }} ₽</p>
+                    </div>
+                    <div v-else>
+                      <span>{{ clubPageData.content.clubInfo.entryCost }} ₽</span>
+                    </div>
                 </div>
               </div>
               <div class="project-info__item">
                 <p>Целевая сумма</p>
-                <div v-html="getCertificateCost(clubPageData.content)">
+                <div v-html="clubPageData.content.clubInfo.certificateCost + ' ₽'">
                 </div>
               </div>
               <div class="project-info__item">
@@ -69,7 +75,7 @@
                   v-if="paymentButtonData.enterButtonShow"
                   :data-payment-id="paymentButtonData.paymentId"
                   :data-payment-status="paymentButtonData.buttonStatusClass"
-                  @click="paymentAction"
+                  @click="paymentButtonAction"
                   style="margin-bottom: 15px"
               >
                 {{paymentButtonData.enterButtonText}}
@@ -152,18 +158,6 @@ export default {
       }
       return discounts
     },
-    getCertificateCost(clubPageData) {
-      if (!clubPageData.clubInfo.discountCertificateCost) {
-        return `
-            <p>${clubPageData.clubInfo.certificateCost} ₽</p>
-        `
-      } else {
-        return `
-            <p class="old-price text-light"> ${clubPageData.clubInfo.certificateCost} ₽</p>
-            <p>${clubPageData.clubInfo.discountCertificateCost}</p>
-        `
-      }
-    },
     definePaymentButtonStatus(payment) {
       let result = {};
       switch (payment.status) {
@@ -205,19 +199,46 @@ export default {
       }
       this.paymentButtonData = result;
     },
-    testMethod() {
-      console.log('test method')
-    },
-    paymentAction() {
+    paymentButtonAction() {
       const button = this.$el.querySelector('.status-button');
       if (button) {
         if (button.dataset.paymentId !== 'none') {
-          router.push(`/payments/show/${button.dataset.paymentId}`);
+          const options = {
+            content: "<h6>Вы действительно хотите перейти к платежам?</h6>",
+            action: {
+              display: 'block',
+              buttonText: 'Вступить',
+              function: this.goToPayments,
+            },
+          }
+          this.$modal.initModal(options);
         } else {
-          router.push(`/payments/new/${this.clubId}`);
+          const options = {
+            content: "<h6>Вы действительно хотите вступить в группу?</h6><div></div>",
+            action: {
+              display: 'block',
+              buttonText: 'Вступить',
+              function: this.goToPayments,
+            },
+          }
+          this.$modal.initModal(options);
         }
       }
     },
+    goToPayments() {
+      const button = this.$el.querySelector('.status-button');
+      let isThisNewPayment = false;
+      if (button.dataset.paymentId === 'none') {
+        isThisNewPayment = true;
+      }
+      router.push({
+        name: `Payments`,
+        params: {
+          newPayment: isThisNewPayment
+        }
+      })
+      return true;
+    }
   },
   mounted() {
     this.siteName = this.getGlobals.siteName;
@@ -282,6 +303,7 @@ export default {
                       mutatedClubData.clubInfo.discountCertificateCost = discounts.discountCertificateCost;
                       mutatedClubData.clubInfo.discountEntryCost = discounts.discountEntryCost;
                       this.$set(this.clubPageData, 'content', mutatedClubData);
+                      console.log(this.clubPageData)
                     }).then(() => {
                         if (this.getUserInfo.isLogged) {
                                 fetch(this.getGlobals.siteName + `/v1/club/${this.clubId}/payment`, {
@@ -300,16 +322,6 @@ export default {
                 })
                 })
         })
-    
-    const options = {
-      content: "<h2>Test</h2>",
-      action: {
-        display: 'block',
-        buttonText: 'Test method',
-        function: this.testMethod,
-      },
-    }
-    this.$modal.initModal(options);
   }
 }
 </script>

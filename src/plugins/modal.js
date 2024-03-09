@@ -62,13 +62,13 @@ export default {
                              ${newModal.modalContent}
                           </div>
                           
-                          <div>
+                          <div class="page-modal__buttons">
                           
-                            <button class="action-button" style="display: ${options?.action.display}">
+                            <button class="status-button" style="display: ${options?.action.display}; width: auto">
                             ${options?.action.buttonText} 
                           </button>
                           
-                            <button class="action-button close-modal-button">Отмена</button>
+                            <button class="user__button action-button close-modal-button">Отмена</button>
                           
                           </div>
                           
@@ -101,15 +101,27 @@ export default {
                         button.addEventListener('click', () => { instance.hide(instance) })
                     })
                     if (options.action.function !== undefined) {
-                        newModalElement.querySelector('.action-button').addEventListener('click', options.action.function);
+                        newModalElement.querySelector('.action-button').addEventListener('click', () => {
+                            if (options.action.function()) {
+                                instance.hide(instance);
+                            } else {
+                                instance.hide(instance);
+                                const options = {
+                                    content: "<h2>Ошибка назначенного действия</h2>",
+                                    action: {
+                                        display: 'none',
+                                        buttonText: 'Вступить',
+                                        function: null,
+                                    },
+                                }
+                                Vue.prototype.$modal.initModal(options);
+                            }
+                        })
                     }
                     instance.show(instance)
                 }
                 
             },
-
-            
-            
         }
     }
 }

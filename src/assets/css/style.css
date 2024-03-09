@@ -77,6 +77,11 @@ h5 {
   color: #3F4354;
 }
 
+h6 {
+  font-size: 18px;
+  color: #101025;
+}
+
 p {
   font-size: 16px;
 }
@@ -1714,4 +1719,13 @@ body {
   min-height: 100px;
   margin-top: 20px;
   width: 100%;
+}
+.page-modal__buttons {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.page-modal__buttons button:not(:last-child) {
+  margin-right: 1rem;
 }

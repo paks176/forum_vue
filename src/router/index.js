@@ -26,7 +26,8 @@ const routes = [
         component: () => import('../components/AuthPage.vue')
     },
     {
-        path: '/payments/:action/:elementId',
+        name: 'Payments',
+        path: '/payments/',
         component: () => import('../components/PaymentsPage.vue')
     },
     {

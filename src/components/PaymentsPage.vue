@@ -1,7 +1,6 @@
 <template>
 <div>
-  <p>{{this.$route.params.action}}</p>
-  <p>{{this.$route.params.elementId}}</p>
+  <p>{{this.$route.params}}</p>
 </div>
 </template>
 

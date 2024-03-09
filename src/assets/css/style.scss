@@ -1330,6 +1330,15 @@ body {
       width: 100%;
     }
   }
+  &-modal__buttons {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    & button:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
 }
 
 @import 'responsive';
