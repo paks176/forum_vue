@@ -64,11 +64,11 @@ export default {
                           
                           <div class="page-modal__buttons">
                           
-                            <button class="status-button" style="display: ${options?.action.display}; width: auto">
+                            <button class="status-button action-button" style="display: ${options?.action.display}; width: auto">
                             ${options?.action.buttonText} 
                           </button>
                           
-                            <button class="user__button action-button close-modal-button">Отмена</button>
+                            <button class="user__button close-modal-button">Отмена</button>
                           
                           </div>
                           
@@ -102,20 +102,8 @@ export default {
                     })
                     if (options.action.function !== undefined) {
                         newModalElement.querySelector('.action-button').addEventListener('click', () => {
-                            if (options.action.function()) {
-                                instance.hide(instance);
-                            } else {
-                                instance.hide(instance);
-                                const options = {
-                                    content: "<h2>Ошибка назначенного действия</h2>",
-                                    action: {
-                                        display: 'none',
-                                        buttonText: 'Вступить',
-                                        function: null,
-                                    },
-                                }
-                                Vue.prototype.$modal.initModal(options);
-                            }
+                            options.action.function();
+                            instance.hide(instance);
                         })
                     }
                     instance.show(instance)

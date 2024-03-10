@@ -44,8 +44,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getData']),
-    ...mapGetters(['getGlobals']),
+    ...mapGetters(['getData', 'getGlobals']),
   },
   methods: {
     ...mapActions(['sendRequest']),

@@ -31,6 +31,7 @@ export default new Vuex.Store({
             return fetch(resultURL, {
                 method: method,
                 headers: headers,
+                credentials: 'include',
                 body: body
             })
                 .then(response => {
