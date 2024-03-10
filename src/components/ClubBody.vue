@@ -228,7 +228,7 @@ export default {
     goToPayments() {
       const button = this.$el.querySelector('.status-button');
       let params = {
-        newPayment: button.dataset.paymentId !== 'none',
+        newPayment: button.dataset.paymentId === 'none',
         paymentId: button.dataset.paymentId === 'none' ? null : button.dataset.paymentId,
       };
       router.push({
