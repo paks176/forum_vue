@@ -3,9 +3,10 @@ export default {
         Vue.prototype.$modal = {
             class: class Modal {
                 constructor(options) {
+                    this.status = 'closed';
                     this.modalId = this.getModalId(Vue)
                     this.modalContent = options.content;
-                    this.modalAction = options.action;
+                    //this.modalAction = options.action;
                 }
 
                 hide(instance) {
@@ -15,6 +16,9 @@ export default {
                         setTimeout(() => {
                             instance.backDrop.style.opacity = '0';
                             setTimeout(() => {
+                                instance.status = 'closed'
+                                instance.element.classList.remove('opened');
+                                instance.element.classList.add('closed');
                                 instance.backDrop.style.display = 'none';
                             }, 300)
                         })
@@ -22,35 +26,65 @@ export default {
                 }
 
                 show(instance) {
-                    instance.backDrop.style.display = 'flex'
+                    for (let key in Vue.$myModals) {
+                        if (Vue.$myModals[key].status === 'opened') {
+                            Vue.$myModals[key].hide();
+                        }
+                    }
+                    instance.backDrop.style.display = 'flex';
                     setTimeout(() => {
-                        instance.backDrop.style.opacity = '1'
+                        instance.backDrop.style.opacity = '1';
                         setTimeout(() => {
-                            instance.element.style.display = 'flex'
+                            instance.element.style.display = 'flex';
                             setTimeout(() => {
-                                instance.element.style.opacity = '1'
+                                instance.status = 'opened'
+                                instance.element.classList.add('opened');
+                                instance.element.classList.remove('closed');
+                                instance.element.style.opacity = '1';
                             }, 300)
                         }, 10)
                     }, 10)
                 }
-                
+
                 getModalId(Vue) {
                     // eslint-disable-next-line no-prototype-builtins
                     if (Vue.hasOwnProperty('$myModals')) {
-                        return 'modal_' + (Vue.$myModals.length + 1)
+                        return 'modal_' + (Object.keys(Vue.$myModals).length + 1)
                     } else {
                         Vue.$myModals = {};
+                        let backDrop = document.createElement('div');
+                        backDrop.classList.add('page-backdrop');
+                        document.body.insertAdjacentElement('beforeend', backDrop);
                         return 'modal_1';
                     }
                 }
             },
-            
+
             initModal(options) {
-                const newModal =  new Vue.prototype.$modal.class(options);
-                
-                Vue.$myModals[newModal.modalId] = newModal;
-                
-                const newModalLayout = `
+                // find existing modal
+                const existingModal = findExistingModal();
+
+                function findExistingModal() {
+                    let id = undefined;
+                    for (let key in Vue.$myModals) {
+                        if (Vue.$myModals[key].modalContent === options.content) {
+                            id = Vue.$myModals[key].modalId;
+                        }
+                    }
+                    return id;
+                }
+
+                // eslint-disable-next-line no-prototype-builtins
+                if (Vue.hasOwnProperty('$myModals') && existingModal) {
+                    const instance = Vue.$myModals[existingModal];
+                    instance.show(instance);
+                } else {
+                    // create new modal
+                    const newModal = new Vue.prototype.$modal.class(options);
+
+                    Vue.$myModals[newModal.modalId] = newModal;
+
+                    const newModalLayout = `
                         <section class="page-modal" id="${newModal.modalId}">
                         
                           <button class="user__button close-modal-button" style="width: 30px; height: 30px; padding: 8px; border-radius: 7px">
@@ -75,40 +109,33 @@ export default {
                         </section>
                     `;
 
-                let backDrop;
+                    let backDrop = document.querySelector('.page-backdrop');
+                    backDrop.insertAdjacentHTML('beforeend', newModalLayout);
 
-                // eslint-disable-next-line no-prototype-builtins
-                if (!Vue.hasOwnProperty('$myModals')) {
-                    backDrop = document.querySelector('.page-backdrop');
-                } else {
-                    // find and insert in existing backdrop
-                    backDrop = document.createElement('div');
-                    backDrop.classList.add('page-backdrop');
-                    document.body.insertAdjacentElement('beforeend', backDrop);
-                }
-                
-                backDrop.insertAdjacentHTML('beforeend', newModalLayout);
-                
-                const newModalElement = document.querySelector(`#${newModal.modalId}`);
-                
-                const instance = Vue.$myModals[newModal.modalId];
-                
-                if (newModalElement) {
-                    instance.element = newModalElement;
-                    instance.backDrop = backDrop;
-                    const closeButtons = newModalElement.querySelectorAll('.close-modal-button');
-                    closeButtons.forEach(button => {
-                        button.addEventListener('click', () => { instance.hide(instance) })
-                    })
-                    if (options.action.function !== undefined) {
-                        newModalElement.querySelector('.action-button').addEventListener('click', () => {
-                            options.action.function();
-                            instance.hide(instance);
+                    const newModalElement = document.querySelector(`#${newModal.modalId}`);
+
+                    const instance = Vue.$myModals[newModal.modalId];
+
+                    if (newModalElement) {
+                        instance.element = newModalElement;
+                        instance.backDrop = backDrop;
+                        const closeButtons = newModalElement.querySelectorAll('.close-modal-button');
+                        closeButtons.forEach(button => {
+                            button.addEventListener('click', () => {
+                                instance.hide(instance)
+                            })
                         })
+                        if (options.action.function !== undefined) {
+                            console.log(options.argument)
+                            newModalElement.querySelector('.action-button').addEventListener('click', () => {
+                                options.action.function(options.argument);
+                                instance.hide(instance);
+                            })
+                        }
+                        instance.show(instance)
                     }
-                    instance.show(instance)
                 }
-                
+
             },
         }
     }

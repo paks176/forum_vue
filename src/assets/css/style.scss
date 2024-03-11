@@ -265,6 +265,7 @@ body {
 
 .content-wrapper {
   width: 100%;
+  padding-bottom: 5rem;
 }
 
 .content {
@@ -452,7 +453,7 @@ body {
         border-color: #004237;
       }
     }
-    &#requisite {
+    &.requisite {
       max-width: 200px;
     }
   }
@@ -1323,11 +1324,15 @@ body {
     align-items: flex-end;
     transition: all 0.3s ease;
     color: $main_black;
+    max-width: 50%;
     &__content {
       min-width: 200px;
       min-height: 100px;
-      margin-top: 20px;
+      margin: 20px 0 40px;
       width: 100%;
+      & .message {
+        margin: 20px 0;
+      }
     }
   }
   &-modal__buttons {

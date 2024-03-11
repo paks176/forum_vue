@@ -9,11 +9,15 @@ import router from './router/index';
 Vue.config.productionTip = false;
 
 // plugins
-import validateForm from '@/plugins/validateForm';
-import modal from '@/plugins/modal';
+import ValidateForm from '@/plugins/validateForm';
+import Modal from '@/plugins/modal';
+import DefinePaymentStatus from "@/plugins/definePaymentStatus";
+import GetUserRole from "@/plugins/getUserRole";
 
-Vue.use(validateForm);
-Vue.use(modal);
+Vue.use(ValidateForm);
+Vue.use(Modal);
+Vue.use(DefinePaymentStatus);
+Vue.use(GetUserRole);
 
 window.vue = new Vue({
   store: Store,

@@ -6,7 +6,7 @@
           <img src="../assets/img/group.svg" alt="">
         </div>
         <div class="club__content">
-          <h2><a>{{ club.name }}</a></h2>
+          <h2><router-link :to="`clubpage_${club.id}`">{{ club.name }}</router-link></h2>
           <h3>{{ club.description }}</h3>
           <div class="club__more">
             <p>Общая сумма: <span data-sum="">{{club.costInfo.certificateCost}}</span> ₽</p>
@@ -23,7 +23,7 @@
             </g>
           </svg>
         </button>
-        <a data-target="club-page" id="27" data-crumb="Test edited - 3 edited">Подробнее</a>
+        <router-link :to="`clubpage_${club.id}`">Подробнее</router-link>
       </div>
     </section>
   </div>

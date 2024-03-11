@@ -125,25 +125,6 @@ export default {
   methods: {
     ...mapActions(['sendRequest', 'getUserPayment']),
     ...mapMutations(['setData']),
-    getUserRole(role) {
-      switch (role) {
-        case 'PARTNER':
-          return {
-            text: 'Партнер',
-            color: '#c99f13'
-          }
-        case 'ADMIN':
-          return {
-            text: 'Администратор',
-            color: 'rgb(200 80 72)'
-          }
-        case 'USER':
-          return {
-            text: 'Пользователь',
-            color: 'rgb(0 110 169)'
-          }
-      }
-    },
     checkDiscounts(clubContent) {
       let discounts = {}
       if (clubContent.costInfo.discountCertificateCost !== null) {
@@ -214,7 +195,15 @@ export default {
           this.$modal.initModal(options);
         } else {
           const options = {
-            content: "<h6>Вы действительно хотите вступить в группу?</h6><div></div>",
+            content: `
+                <h6>Вы действительно хотите вступить в группу?</h6>
+                <div>
+                <p class="message">Стоимость участия: 
+                    <b>${this.clubPageData.content.clubInfo.discountEntryCost ? this.clubPageData.content.clubInfo.discountEntryCost : this.clubPageData.content.clubInfo.entryCost} ₽</b>
+                    </p>
+                    
+                    <p>При нажатии "Вступить" будет создана запись в вашем списке платежей. В ней можно будет увидеть реквизиты для внесения платежа. После подтверждения оплаты Администратором вы станете участником Складчины и сможете читать и писать комментарии.</p>
+                </div>`,
             action: {
               display: 'block',
               buttonText: 'Вступить',
@@ -274,7 +263,7 @@ export default {
                 const thisAuthor = this.getData([`club-${this.clubId}_content`, 'author']);
                 mutatedClubData.author.avatar = (thisAuthor.email.slice(0, 1)).toUpperCase();
                 mutatedClubData.author.nick = thisAuthor.email;
-                mutatedClubData.author.role = this.getUserRole(thisAuthor.role).text;
+                mutatedClubData.author.role = this.$getUserRole(thisAuthor.role).text;
                 // getting club content
                 mutatedClubData.clubContent.header = responseClubData.name;
                 mutatedClubData.clubContent.description = responseClubData.description;
@@ -299,7 +288,6 @@ export default {
                       mutatedClubData.clubInfo.discountCertificateCost = discounts.discountCertificateCost;
                       mutatedClubData.clubInfo.discountEntryCost = discounts.discountEntryCost;
                       this.$set(this.clubPageData, 'content', mutatedClubData);
-                      console.log(this.clubPageData)
                     })
                     .then(() => {
                       if (this.getUserInfo.isLogged) {
@@ -311,7 +299,7 @@ export default {
                         };
                         this.sendRequest(userPaymentInfoRequest)
                             .then(() => {
-                              this.definePaymentButtonStatus(this.getData([`club-${this.clubId}-payment`]))
+                              this.paymentButtonData = this.$definePaymentStatus(this.getData([`club-${this.clubId}-payment`]))
                             })
                       }
                     })
