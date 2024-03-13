@@ -6,44 +6,58 @@ export default {
                     this.status = 'closed';
                     this.modalId = this.getModalId(Vue)
                     this.modalContent = options.content;
-                    //this.modalAction = options.action;
+                    this.argument = options.action.argument;
                 }
 
                 hide(instance) {
-                    instance.element.style.opacity = '0';
-                    setTimeout(() => {
-                        instance.element.style.display = 'none';
+                    return new Promise((resolve) => {
+                        instance.element.style.opacity = '0';
                         setTimeout(() => {
-                            instance.backDrop.style.opacity = '0';
-                            setTimeout(() => {
-                                instance.status = 'closed'
-                                instance.element.classList.remove('opened');
-                                instance.element.classList.add('closed');
-                                instance.backDrop.style.display = 'none';
-                            }, 300)
-                        })
+                            instance.element.style.display = 'none';
+                            instance.status = 'closed';
+                            instance.element.classList.remove('opened');
+                            instance.element.classList.add('closed');
+                            if (Object.keys(Vue.$myModals).length > 0) {
+                                let openedModals = 0;
+                                for (let key in Vue.$myModals) {
+                                    if (Vue.$myModals[key].status === 'opened') {
+                                        openedModals += 1;
+                                    }
+                                }
+                                if (openedModals === 0) {
+                                    instance.backDrop.style.opacity = '0';
+                                    setTimeout(() => {
+                                        instance.backDrop.style.display = 'none';
+                                    }, 300)
+                                }
+                            }
+                            resolve();
+                        }, 350)
                     })
                 }
 
                 show(instance) {
-                    for (let key in Vue.$myModals) {
-                        if (Vue.$myModals[key].status === 'opened') {
-                            Vue.$myModals[key].hide();
-                        }
-                    }
-                    instance.backDrop.style.display = 'flex';
-                    setTimeout(() => {
-                        instance.backDrop.style.opacity = '1';
+                    function executeShow(instance) {
+                        instance.status = 'opened'
+                        instance.backDrop.style.display = 'flex';
                         setTimeout(() => {
+                            instance.backDrop.style.opacity = '1';
                             instance.element.style.display = 'flex';
-                            setTimeout(() => {
-                                instance.status = 'opened'
-                                instance.element.classList.add('opened');
-                                instance.element.classList.remove('closed');
-                                instance.element.style.opacity = '1';
-                            }, 300)
-                        }, 10)
-                    }, 10)
+                            instance.element.classList.add('opened');
+                            instance.element.classList.remove('closed');
+                            instance.element.style.opacity = '1';
+                        }, 350)
+
+                    }
+
+                    for (let key in Vue.$myModals) {
+                        if (Vue.$myModals[key].status === 'opened' && key !== instance.modalId) {
+                            Vue.$myModals[key].hide(Vue.$myModals[key])
+                                .then(() => {
+                                    executeShow(instance)
+                                });
+                        } else executeShow(instance)
+                    }
                 }
 
                 getModalId(Vue) {
@@ -126,16 +140,14 @@ export default {
                             })
                         })
                         if (options.action.function !== undefined) {
-                            console.log(options.argument)
                             newModalElement.querySelector('.action-button').addEventListener('click', () => {
-                                options.action.function(options.argument);
+                                options.action.function(instance.argument);
                                 instance.hide(instance);
                             })
                         }
                         instance.show(instance)
                     }
                 }
-
             },
         }
     }

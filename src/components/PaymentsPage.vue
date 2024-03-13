@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section v-for="item in allPayments.content" :key="item.id" class="payment">
+    <section v-for="item in allPayments.content" :key="item.id" :id="`payment_${item.id}`" class="payment">
       <div class="payment__left">
 
         <div>
@@ -11,16 +11,15 @@
             </router-link>
           </h2>
         </div>
-
-        <div class="payment__actions">
+        
+        <div class="payment__actions" v-if="item.status === 'NEW'">
           <button class="user__button requisite" @click="showRequisite" :data-payment="item.id" :data-club="item.paymentInfo.clubId" style="margin-right: 20px">
             Посмотреть реквизиты
           </button>
-          <div v-if="item.status === 'NEW'">
-            <button class="user__button" :data-payment="item.id">
-              Я оплатил
-            </button>
-          </div>
+
+          <button class="user__button" @click="askConfirmation(item.id)" :data-payment="item.id" :data-club="item.paymentInfo.clubId">
+            Я оплатил
+          </button>
         </div>
 
         <div v-if="item.comment" class="payment__comment">
@@ -43,7 +42,9 @@
             {{ item.paymentInfo.comment }}
           </div>
         </div>
+        
       </div>
+      
     </section>
   </div>
 </template>
@@ -53,6 +54,7 @@ import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "PaymentsPage",
+
   data() {
     return {
       allPayments: [],
@@ -60,13 +62,16 @@ export default {
       rawPaymentsData: {}
     }
   },
+
   computed: {
     ...mapGetters(['getData', 'getUserInfo', 'getGlobals']),
   },
+
   methods: {
     ...mapActions(['sendRequest', 'getUserPayment']),
-    
+
     showRequisite(event) {
+      //const clubId = event.target.dataset.club;
       const paymentId = event.target.dataset.payment;
       const options = {
         content: `<div class="requisite-info">
@@ -93,11 +98,11 @@ export default {
       }
       this.$modal.initModal(options);
     },
+
     askConfirmation(paymentId) {
       const options = {
         content: `<div>
                     <h2 style="margin-bottom: 20px">Вы подтверждаете внесение оплаты?</h2>
-                    <br>
                     <p>Ваш платеж в складчину <b>${this.allPayments.content[paymentId].clubName}</b> будет переведен в статус "Платеж отправлен" и будет ожидать проверки администратором.</p>
                    </div>`,
         action: {
@@ -109,20 +114,51 @@ export default {
       }
       this.$modal.initModal(options);
     },
+
     sendConfirmation(paymentId) {
-      fetch(`/v1/payment/${paymentId}/send`, {
+      fetch(`${this.getGlobals.siteName}/v1/payment/${paymentId}/send`, {
         method: 'POST',
-        credentials: "include"
+        credentials: "include",
+        headers: this.getGlobals.headers
       }).then(data => {
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('paymentInfo')) {
-          console.log(data)
-        } else {
-          // error message modal
-        }
+        data.json()
+            .then(response => {
+              // eslint-disable-next-line no-prototype-builtins
+              if (response.hasOwnProperty('paymentInfo')) {
+                const thisPayment = this.$el.querySelector(`#payment_${response.id}`);
+                if (thisPayment) {
+                  const 
+                      buttons = thisPayment.querySelector('.payment__actions'),
+                      statusIndicator = thisPayment.querySelector('.status-button'),
+                      paymentIndicatorMessage = thisPayment.querySelector('.aside-text');
+                  
+                  buttons.style.opacity = '0';
+                  setTimeout(() => {buttons.style.display = 'none'}, 300);
+                  
+                  statusIndicator.classList.add('waitingForCheck');
+                  statusIndicator.classList.remove('waitingForUser');
+                  statusIndicator.innerText = 'Платеж отправлен';
+
+                  paymentIndicatorMessage.innerText = 'Платеж отправлен, находится на проверке у модератора'
+                }
+              } else {
+                // error message modal
+                const options = {
+                  content: `<div>
+                                    <h2 style="margin-bottom: 20px">Ошибка отправки платежа</h2>
+                                    <p>Текст ошибки: ${response.message}</p>
+                                  </div>`,
+                  action: {
+                    display: 'none',
+                  },
+                }
+                this.$modal.initModal(options)
+              }
+            })
       })
     }
   },
+
   watch: {
     promises() {
       if (this.promises === 0) {
