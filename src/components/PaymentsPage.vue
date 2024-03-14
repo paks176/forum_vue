@@ -51,6 +51,7 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
+import {nextTick} from "vue";
 
 export default {
   name: "PaymentsPage",
@@ -117,7 +118,7 @@ export default {
 
     sendConfirmation(paymentId) {
       fetch(`${this.getGlobals.siteName}/v1/payment/${paymentId}/send`, {
-        method: 'POST',
+        method: "POST",
         credentials: "include",
         headers: this.getGlobals.headers
       }).then(data => {
@@ -156,6 +157,16 @@ export default {
               }
             })
       })
+    },
+    
+    checkNew() {
+      if (this.$route.params.newPayment === true) {
+          const thisItem = document.querySelector(`#payment_${this.$route.params.paymentId}`);
+          if (thisItem) {
+            thisItem.classList.add('highlighted');
+            thisItem.scrollIntoView();
+          }
+      }
     }
   },
 
@@ -163,8 +174,9 @@ export default {
     promises() {
       if (this.promises === 0) {
         this.$set(this.allPayments, 'content', this.rawPaymentsData);
-        console.log('this.allPayments:')
-        console.log(this.allPayments)
+        nextTick(() => {
+          this.checkNew();
+        })
       }
     }
   },

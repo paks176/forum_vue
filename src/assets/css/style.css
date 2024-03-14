@@ -96,8 +96,8 @@ main {
 }
 
 .highlighted {
-  animation-name: blur;
-  animation-duration: 2s;
+  animation-name: highlight;
+  animation-duration: 3s;
   transition: all 2s ease;
 }
 
@@ -415,14 +415,14 @@ main {
     transform: rotate(360deg);
   }
 }
-@keyframes blur {
+@keyframes highlight {
   0% {
-    box-shadow: 0 4px 16px rgba(0, 56, 43, 0);
-    outline: 3px solid indianred;
+    background-color: rgba(0, 169, 128, 0.26);
+    outline: 4px solid #00382B;
   }
   100% {
-    box-shadow: 0 4px 16px rgba(0, 56, 43, 0.1);
-    outline: 3px solid transparent;
+    background-color: #FFFFFF;
+    outline: 4px solid rgba(0, 169, 128, 0);
   }
 }
 @keyframes appear {
@@ -1720,7 +1720,6 @@ body {
 }
 .page-modal__content {
   min-width: 200px;
-  min-height: 100px;
   margin: 20px 0 40px;
   width: 100%;
 }

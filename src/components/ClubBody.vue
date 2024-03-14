@@ -72,7 +72,7 @@
           <button
               class="status-button"
               :class="{[paymentButtonData.buttonStatusClass]: true}"
-              v-if="paymentButtonData.enterButtonShow"
+              
               :data-payment-id="paymentButtonData.paymentId"
               :data-payment-status="paymentButtonData.buttonStatusClass"
               @click="paymentButtonAction"
@@ -139,47 +139,6 @@ export default {
       }
       return discounts
     },
-    definePaymentButtonStatus(payment) {
-      let result = {};
-      switch (payment.status) {
-        case 'NEW':
-          result.enterButtonShow = true;
-          result.enterButtonText = 'Ожидает оплаты';
-          result.enterMessage = 'Платеж создан, ожидает вашей оплаты';
-          result.buttonStatusClass = 'waitingForUser';
-          result.paymentsLinkStatus = 'active';
-          result.participation = false;
-          result.paymentId = payment.id;
-          break
-        case 'CONFIRMED':
-          result.enterButtonShow = false;
-          result.enterButtonText = 'Платеж подтвержден';
-          result.enterMessage = 'Платеж подтвержден, вы участник складчины';
-          result.buttonStatusClass = 'succeed';
-          result.paymentsLinkStatus = 'active';
-          result.participation = true;
-          result.paymentId = payment.id;
-          break;
-        case 'SEND':
-          result.enterButtonShow = false;
-          result.enterButtonText = 'Платеж отправлен';
-          result.enterMessage = 'Платеж отправлен, находится на проверке у модератора';
-          result.buttonStatusClass = 'waitingForCheck';
-          result.paymentsLinkStatus = '';
-          result.participation = false;
-          result.paymentId = payment.id;
-          break;
-        default:
-          result.enterButtonShow = true;
-          result.enterButtonText = 'Вступить';
-          result.enterMessage = 'Нажмите, чтобы создать платеж для вступления';
-          result.buttonStatusClass = 'notCreated';
-          result.paymentsLinkStatus = 'active';
-          result.participation = false;
-          result.paymentId = 'none';
-      }
-      this.paymentButtonData = result;
-    },
     paymentButtonAction() {
       const button = this.$el.querySelector('.status-button');
       if (button) {
@@ -188,7 +147,7 @@ export default {
             content: "<h6>Вы действительно хотите перейти к платежам?</h6>",
             action: {
               display: 'block',
-              buttonText: 'Вступить',
+              buttonText: 'Перейти',
               function: this.goToPayments,
             },
           }
@@ -207,7 +166,8 @@ export default {
             action: {
               display: 'block',
               buttonText: 'Вступить',
-              function: this.goToPayments,
+              function: this.createPayment,
+              argument: this.clubPageData.content.clubInfo.clubID,
             },
           }
           this.$modal.initModal(options);
@@ -224,6 +184,40 @@ export default {
         name: `Payments`,
         params
       })
+    },
+    
+    createPayment(clubId) {
+      fetch(`${this.getGlobals.siteName}/v1/payment/${clubId}`, {
+        method: 'POST',
+        credentials: "include",
+        headers: this.getGlobals.headers
+      })
+          .then(response => {
+            if (response.status === 200) {
+              response.json()
+                  .then(data => {
+                    let params = {
+                      newPayment: true,
+                      paymentId: data.id,
+                    };
+                    router.push({
+                      name: `Payments`,
+                      params
+                    })
+              })
+            } else {
+              const options = {
+                content: `<h6>Произошла ошибка!</h6><p style="text-align: center; font-size: 48px">${response.status}</p>`,
+              };
+              this.$modal.initModal(options);
+            }
+          })
+          .catch(err => {
+            const options = {
+              content: `<h6>Произошла ошибка!</h6><p style="text-align: center; font-size: 48px">${err}</p>`,
+            };
+            this.$modal.initModal(options);
+          })
     }
   },
   
@@ -261,7 +255,7 @@ export default {
           this.sendRequest(authorRequest)
               .then(() => {
                 const thisAuthor = this.getData([`club-${this.clubId}_content`, 'author']);
-                mutatedClubData.author.avatar = (thisAuthor.email.slice(0, 1)).toUpperCase();
+                mutatedClubData.author.avatar = thisAuthor.email ? (thisAuthor.email.slice(0, 1)).toUpperCase() : 'A'
                 mutatedClubData.author.nick = thisAuthor.email;
                 mutatedClubData.author.role = this.$getUserRole(thisAuthor.role).text;
                 // getting club content
@@ -300,6 +294,7 @@ export default {
                         this.sendRequest(userPaymentInfoRequest)
                             .then(() => {
                               this.paymentButtonData = this.$definePaymentStatus(this.getData([`club-${this.clubId}-payment`]))
+                                  console.log(this.clubPageData)
                             })
                       }
                     })
