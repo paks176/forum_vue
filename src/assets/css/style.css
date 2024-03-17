@@ -121,6 +121,10 @@ main {
   cursor: pointer !important;
 }
 
+.hover-disabled {
+  pointer-events: none;
+}
+
 .cursor-default {
   cursor: default !important;
 }
@@ -962,6 +966,11 @@ body {
 .project-info#status {
   display: none;
 }
+.project-info.message-block {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
 
 .bright-button#enter-button {
   display: none;
@@ -973,7 +982,6 @@ body {
 
 .comment {
   padding: 0;
-  height: 0;
   overflow: hidden;
   background-color: #FFFFFF;
   justify-content: space-between;
@@ -1131,6 +1139,7 @@ body {
   padding: 10px;
   border-radius: 16px;
   filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
+  margin-top: 48px;
 }
 .write-form textarea {
   padding: 12px;
@@ -1241,6 +1250,16 @@ body {
   margin-bottom: 20px;
   border-radius: 16px;
   filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
+}
+.reply-place.visible .aside-text {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.67);
+}
+.reply-place__text {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 12px;
 }
 
 .empty {
@@ -1667,6 +1686,7 @@ body {
   padding: 5px;
   border-radius: 5px;
   color: rgba(0, 0, 0, 0.67);
+  text-align: center;
 }
 .payment__header {
   margin-bottom: 30px;

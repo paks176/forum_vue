@@ -545,6 +545,11 @@ body {
   &#status {
     display: none;
   }
+  &.message-block {
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+  }
 }
 
 .bright-button#enter-button {
@@ -557,7 +562,6 @@ body {
 
 .comment {
   padding: 0;
-  height: 0;
   overflow: hidden;
   background-color: $main-white;
   justify-content: space-between;
@@ -728,7 +732,7 @@ body {
     padding: 10px;
     border-radius: 16px;
     filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
-
+    margin-top: 48px;
     & textarea {
       padding: 12px;
       border-radius: 8px;
@@ -830,6 +834,16 @@ body {
     margin-bottom: 20px;
     border-radius: 16px;
     filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
+    & .aside-text {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.67);
+    }
+  }
+  &-place__text {
+    background-color: $main_white;
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 12px;
   }
 }
 
@@ -1272,6 +1286,7 @@ body {
       padding: 5px;
       border-radius: 5px;
       color: $text-gray-transparent;
+      text-align: center;
     }
   }
   &__header {

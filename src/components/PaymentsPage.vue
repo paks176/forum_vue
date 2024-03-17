@@ -33,11 +33,11 @@
 
       <div class="status">
         <p class="payment__header">Статус платежа:</p>
-        <div class="status-button" :class="{[item.enterStatus.buttonStatusClass]: true}">{{ item.enterStatus.enterButtonText }}</div>
+        <div class="status-button hover-disabled" :class="{[item.enterStatus.buttonStatusClass]: true}">{{ item.enterStatus.enterButtonText }}</div>
         <p class="aside-text">{{ item.enterStatus.enterMessage }}</p>
 
         <div v-if="item.paymentInfo.comment" class="payment__comment">
-          <p>Комментарий модератора к платежу:</p>
+          <p>Комментарий к платежу:</p>
           <div class="payment__comment--field">
             {{ item.paymentInfo.comment }}
           </div>

@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="project-info__item">
-            <p>Целевая сумма</p>
+            <p>Целевая<br>сумма</p>
             <div v-html="clubPageData.content.clubInfo.certificateCost + ' ₽'">
             </div>
           </div>
@@ -294,7 +294,6 @@ export default {
                         this.sendRequest(userPaymentInfoRequest)
                             .then(() => {
                               this.paymentButtonData = this.$definePaymentStatus(this.getData([`club-${this.clubId}-payment`]))
-                                  console.log(this.clubPageData)
                             })
                       }
                     })
