@@ -47,14 +47,14 @@
                     </svg>
                   </label>
                 </div>
-                <a href="#comment-form" class="comment__actions--reply">
+                <button @click="writeReply(comment)" class="comment__actions--reply">
                   <svg fill="#668880" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="14px" viewBox="0 0 45.58 45.58" xml:space="preserve">
                     <g>
                     <path d="M45.506,33.532c-1.741-7.42-7.161-17.758-23.554-19.942V7.047c0-1.364-0.826-2.593-2.087-3.113c-1.261-0.521-2.712-0.229-3.675,0.737L1.305,19.63c-1.739,1.748-1.74,4.572-0.001,6.32L16.19,40.909c0.961,0.966,2.415,1.258,3.676,0.737c1.261-0.521,2.087-1.75,2.087-3.113v-6.331c5.593,0.007,13.656,0.743,19.392,4.313c0.953,0.594,2.168,0.555,3.08-0.101C45.335,35.762,45.763,34.624,45.506,33.532z"></path>
                     </g>
                   </svg>
                   <p>Ответить</p>
-                </a>
+                </button>
               </div>
             </div>
           </section>
@@ -64,8 +64,29 @@
       <div v-if="getUserInfo.isLogged">
 
         <div v-if="userInClub" class="write-form">
-          <textarea type="text" placeholder="Введите ваш комментарий"></textarea>
-          <button class="bright-button">Отправить</button>
+          
+          <div class="write-reply">
+            <div class="reply-place visible">
+              <div class="write-reply__header">
+                <h3 style="color: black!important;">Написать ответ на комментарий:</h3>
+                <button class="write-reply__cancel">Отмена</button>
+              </div>
+              <div class="write-reply__comment" data-answer="${commentId}">
+              </div>
+            </div>
+          </div>
+          
+          <textarea
+              placeholder="Введите ваш комментарий"
+              v-model="currentCommentText"
+          ></textarea>
+          <button
+              @click="sendComment"
+              class="bright-button"
+              :class="{ disabled : this.currentCommentText.length === 0 }"
+          >
+            Отправить
+          </button>
         </div>
 
         <div v-else class="project-info message-block">
@@ -84,6 +105,7 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
+import {nextTick} from "vue";
 
 export default {
   name: "ClubComments",
@@ -99,6 +121,8 @@ export default {
       commentsData: '',
       userInClub: false,
       noComments: true,
+      currentCommentText: '',
+      currentAnswer: null,
     }
   },
 
@@ -108,8 +132,40 @@ export default {
 
   methods: {
     ...mapActions(['sendRequest', 'getUserPayment']),
-    sendComment() {
+    
+    writeReply(comment) {
+      console.log(comment)
       
+    },
+    
+    sendComment() {
+      const body = {
+        'value': this.currentCommentText,
+      }
+      
+      if (this.currentAnswer !== null) {
+        body.answered = this.currentAnswer;
+      }
+      
+      const sendCommentRequest = {
+        method: 'POST',
+        requestURL: `/v1/club/${this.$props.clubId}/comment`,
+        headers: this.getGlobals.headers,
+        body: JSON.stringify(body),
+        stateTarget: [`club-${this.$props.clubId}_content`, 'tempComment',],
+      }
+      this.sendRequest(sendCommentRequest)
+          .then(() => {
+            return new Promise(resolve => {
+              const newComment = this.getData([`club-${this.$props.clubId}_content`, 'tempComment']);
+              this.$set(this.$store.state[`club-${this.$props.clubId}_content`].comments, newComment.id, newComment);
+              resolve();
+            }).then(() => {
+              nextTick(() => {
+                this.currentCommentText = ''
+              })
+            })
+          })
     }
   },
 
@@ -140,8 +196,11 @@ export default {
       if (Object.keys(this.commentsData).length === 0) {
         this.noComments = false;
       }
-      console.log(this.commentsData)
     });
+  },
+  mounted() {
+    window.scroll(0, 0);
+    
   }
 }
 </script>)

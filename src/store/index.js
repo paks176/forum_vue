@@ -99,14 +99,6 @@ export default new Vuex.Store({
                 stateTarget: [`club-${this.clubId}_content`, 'user_payment']
             }
             return context.dispatch('sendRequest', clubPaymentRequest)
-                    // {
-                    //     "id": null,
-                    //     "accountId": null,
-                    //     "paymentInfo": null,
-                    //     "status": null,
-                    //     "comment": null,
-                    //     "requisiteDTO": null
-                    // }
         }
     },
     mutations: {
