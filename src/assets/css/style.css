@@ -277,7 +277,7 @@ main {
   text-align: center;
   border: none;
   background: #0ca07c;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 12px 16px;
   color: #FFFFFF;
   transition: all 0.3s ease;
@@ -1128,6 +1128,10 @@ body {
   color: #101025;
 }
 
+.write-reply .reply-place.visible {
+  background-color: #FFFFFF;
+}
+
 .write {
   margin-top: 52px;
 }
@@ -1135,38 +1139,45 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  background-color: rgba(0, 169, 128, 0.16);
-  padding: 10px;
+  background-color: rgb(122, 185, 230);
+  padding: 0 20px 20px 20px;
   border-radius: 16px;
   filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
   margin-top: 48px;
 }
 .write-form textarea {
+  margin-top: 20px;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 56, 43, 0.6);
   background-color: #FFFFFF;
   width: 100%;
-  outline: none;
   resize: none;
   height: auto;
+  border: none;
 }
 .write-form textarea::-moz-placeholder {
-  color: rgba(0, 56, 43, 0.6);
+  color: #3F4354;
 }
 .write-form textarea::placeholder {
-  color: rgba(0, 56, 43, 0.6);
+  color: #3F4354;
 }
 .write-form button {
   margin-top: 20px;
   display: inline-block;
-  width: 20% !important;
+  width: 20%;
 }
 .write-reply {
+  padding: 12px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 4px solid #00A980;
+}
+.write-reply__container {
+  padding-top: 20px;
+  width: 100%;
   overflow: hidden;
-  height: 0;
+  height: 200px;
   transition: all 0.5s ease-out;
-  margin-bottom: 20px;
 }
 .write-reply p:first-child {
   margin-bottom: 20px;
@@ -1177,25 +1188,18 @@ body {
 .write-reply__header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 20px;
 }
-.write-reply__comment {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 169, 128, 0.32);
+.write-reply__comment .reply-comment {
+  margin-bottom: 0;
 }
-.write-reply__cancel {
-  transition: all 0.3s ease;
-  cursor: pointer;
-  background-color: #00382B;
-  color: white;
-  border: none;
+.write-reply .bright-button.cancel {
+  margin-top: 0 !important;
+  width: auto;
+  height: auto;
+  font-size: 16px;
   padding: 8px;
-  border-radius: 8px;
-}
-.write-reply__cancel:hover {
-  background-color: rgba(0, 56, 43, 0.6);
 }
 
 .catalog-category__sub {
@@ -1244,14 +1248,13 @@ body {
   font-weight: 700 !important;
   margin-bottom: 10px;
 }
-.reply-place.visible {
+.reply-comment {
   background-color: rgba(0, 169, 128, 0.26);
   padding: 10px;
   margin-bottom: 20px;
-  border-radius: 16px;
-  filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
+  border-radius: 12px;
 }
-.reply-place.visible .aside-text {
+.reply-comment .aside-text {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.67);
 }

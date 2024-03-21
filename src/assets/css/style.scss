@@ -722,41 +722,52 @@ body {
   }
 }
 
+.write-reply .reply-place.visible {
+  background-color: #FFFFFF;
+}
+
 .write {
   margin-top: 52px;
   &-form {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    background-color: rgba(0, 169, 128, 0.16);
-    padding: 10px;
+    background-color: $skyblue;
+    padding: 0 20px 20px 20px;
     border-radius: 16px;
     filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
     margin-top: 48px;
     & textarea {
+      margin-top: 20px;
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(0, 56, 43, 0.6);
       background-color: $main_white;
       width: 100%;
-      outline: none;
       resize: none;
       height: auto;
+      border: none;
       &::placeholder {
-        color: $text-green-transparent;
+        color: $text-gray;
       }
     }
     & button {
       margin-top: 20px;
       display: inline-block;
-      width: 20% !important;
+      width: 20%;
     }
   }
   &-reply {
-    overflow: hidden;
-    height: 0;
-    transition: all 0.5s ease-out;
-    margin-bottom: 20px;
+    padding: 12px;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    border: 4px solid $text-lightgreen;
+    &__container {
+      padding-top: 20px;
+      width: 100%;
+      overflow: hidden;
+      height: 200px;
+      transition: all 0.5s ease-out;
+    }
     & p:first-child {
       margin-bottom: 20px;
     }
@@ -766,25 +777,18 @@ body {
     &__header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    &__comment {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid $main_green;
+    &__comment .reply-comment {
+      margin-bottom: 0;
     }
-    &__cancel {
-      transition: all 0.3s ease;
-      cursor: pointer;
-      background-color: $text-green;
-      color: white;
-      border: none;
+    & .bright-button.cancel {
+      margin-top: 0 !important;
+      width: auto;
+      height: auto;
+      font-size: 16px;
       padding: 8px;
-      border-radius: 8px;
-      &:hover {
-        background-color: $text-green-transparent;
-      }
     }
   }
 }
@@ -828,12 +832,11 @@ body {
     font-weight: 700 !important;
     margin-bottom: 10px;
   }
-  &-place.visible {
+  &-comment {
     background-color: $main_green_transparent;
     padding: 10px;
     margin-bottom: 20px;
-    border-radius: 16px;
-    filter: drop-shadow(0px 4px 16px rgba(0, 56, 43, 0.1));
+    border-radius: 12px;
     & .aside-text {
       font-size: 14px;
       color: rgba(0, 0, 0, 0.67);

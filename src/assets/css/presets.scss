@@ -9,6 +9,7 @@ $text-green-transparent: rgba(0, 56, 43, 0.6);
 $text-gray: #3F4354;
 $text-gray-transparent: rgba(0, 0, 0, 0.67);
 $blocks-shadow: 0px 4px 16px rgba(0, 56, 43, 0.1);
+$skyblue: rgb(122, 185, 230);
 $userColor: rgb(0 110 169);
 $adminColor: rgb(200 80 72);
 $partnerColor: #c99f13;
@@ -279,7 +280,7 @@ main {
   text-align: center;
   border: none;
   background: #0ca07c;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 12px 16px;
   color: $main-white;
   transition: all 0.3s ease;

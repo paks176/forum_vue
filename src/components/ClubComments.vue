@@ -11,22 +11,22 @@
             <div class="comment__content">
               <div class="comment__body">
                 <div class="comment__user">
-                  <div class="comment__user--avatar"><p>{{(comment.accountEmail[0]).toUpperCase()}}</p></div>
+                  <div class="comment__user--avatar"><p>{{ (comment.accountEmail[0]).toUpperCase() }}</p></div>
                   <div>
-                    <p class="comment__user--name">{{comment.accountEmail}}</p>
-                    <p class="text-light">{{(comment.created).split(' ')[0]}}</p>
+                    <p class="comment__user--name">{{ comment.accountEmail }}</p>
+                    <p class="text-light">{{ (comment.created).split(' ')[0] }}</p>
                   </div>
                 </div>
                 <div class="comment__text">
-                  <div v-if="comment.answered" class="reply-place visible">
+                  <div v-if="comment.answered" class="reply-comment">
                     <p class="aside-text">
-                      <b>{{comment.answered.accountEmail}}</b> написал:
+                      <b>{{ comment.answered.accountEmail }}</b> написал:
                     </p>
                     <div class="reply-place__text">
-                      {{comment.answered.value}}
+                      {{ comment.answered.value }}
                     </div>
                   </div>
-                  <p>{{comment.value}}</p>
+                  <p>{{ comment.value }}</p>
                 </div>
               </div>
               <div class="comment__actions">
@@ -48,9 +48,11 @@
                   </label>
                 </div>
                 <button @click="writeReply(comment)" class="comment__actions--reply">
-                  <svg fill="#668880" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="14px" viewBox="0 0 45.58 45.58" xml:space="preserve">
+                  <svg fill="#668880" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="14px"
+                       viewBox="0 0 45.58 45.58" xml:space="preserve">
                     <g>
-                    <path d="M45.506,33.532c-1.741-7.42-7.161-17.758-23.554-19.942V7.047c0-1.364-0.826-2.593-2.087-3.113c-1.261-0.521-2.712-0.229-3.675,0.737L1.305,19.63c-1.739,1.748-1.74,4.572-0.001,6.32L16.19,40.909c0.961,0.966,2.415,1.258,3.676,0.737c1.261-0.521,2.087-1.75,2.087-3.113v-6.331c5.593,0.007,13.656,0.743,19.392,4.313c0.953,0.594,2.168,0.555,3.08-0.101C45.335,35.762,45.763,34.624,45.506,33.532z"></path>
+                    <path
+                        d="M45.506,33.532c-1.741-7.42-7.161-17.758-23.554-19.942V7.047c0-1.364-0.826-2.593-2.087-3.113c-1.261-0.521-2.712-0.229-3.675,0.737L1.305,19.63c-1.739,1.748-1.74,4.572-0.001,6.32L16.19,40.909c0.961,0.966,2.415,1.258,3.676,0.737c1.261-0.521,2.087-1.75,2.087-3.113v-6.331c5.593,0.007,13.656,0.743,19.392,4.313c0.953,0.594,2.168,0.555,3.08-0.101C45.335,35.762,45.763,34.624,45.506,33.532z"></path>
                     </g>
                   </svg>
                   <p>Ответить</p>
@@ -64,18 +66,20 @@
       <div v-if="getUserInfo.isLogged">
 
         <div v-if="userInClub" class="write-form">
-          
-          <div class="write-reply">
-            <div class="reply-place visible">
-              <div class="write-reply__header">
-                <h3 style="color: black!important;">Написать ответ на комментарий:</h3>
-                <button class="write-reply__cancel">Отмена</button>
-              </div>
-              <div class="write-reply__comment" data-answer="${commentId}">
+
+          <div class="write-reply__container">
+            <div class="write-reply">
+              <div class="reply-place visible">
+                <div class="write-reply__header">
+                  <h3>Написать ответ на комментарий:</h3>
+                  <button class="bright-button cancel">Отмена</button>
+                </div>
+                <div class="write-reply__comment"></div>
               </div>
             </div>
           </div>
-          
+
+
           <textarea
               placeholder="Введите ваш комментарий"
               v-model="currentCommentText"
@@ -132,21 +136,36 @@ export default {
 
   methods: {
     ...mapActions(['sendRequest', 'getUserPayment']),
-    
+
     writeReply(comment) {
-      console.log(comment)
+      const replyBlock = this.$el.querySelector('.write-reply');
+      const replyBlockText = this.$el.querySelector('.write-reply__comment');
+      const replyBlockContainer = this.$el.querySelector('.write-reply__container');
+      const replyLayout = `
+        <div class="reply-comment">
+           <p class="aside-text">
+              <b>${comment.accountEmail}</b> написал:
+           </p>
+           <div class="reply-place__text">${comment.value}</div>
+        </div>
+      `;
+      replyBlockText.innerHTML = replyLayout;
       
+      replyBlock.scrollIntoView();
+      setTimeout(() => {
+        replyBlockContainer.style.height = replyBlock.scrollHeight + 'px';
+      }, 1000)
     },
-    
+
     sendComment() {
       const body = {
         'value': this.currentCommentText,
       }
-      
+
       if (this.currentAnswer !== null) {
         body.answered = this.currentAnswer;
       }
-      
+
       const sendCommentRequest = {
         method: 'POST',
         requestURL: `/v1/club/${this.$props.clubId}/comment`,
@@ -200,7 +219,6 @@ export default {
   },
   mounted() {
     window.scroll(0, 0);
-    
   }
 }
 </script>)
