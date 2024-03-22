@@ -72,7 +72,7 @@
               <div class="reply-place visible">
                 <div class="write-reply__header">
                   <h3>Написать ответ на комментарий:</h3>
-                  <button class="bright-button cancel">Отмена</button>
+                  <button @click="cancelWriteReply" class="bright-button cancel">Отмена</button>
                 </div>
                 <div class="write-reply__comment"></div>
               </div>
@@ -86,7 +86,7 @@
           ></textarea>
           <button
               @click="sendComment"
-              class="bright-button"
+              class="bright-button send"
               :class="{ disabled : this.currentCommentText.length === 0 }"
           >
             Отправить
@@ -138,9 +138,11 @@ export default {
     ...mapActions(['sendRequest', 'getUserPayment']),
 
     writeReply(comment) {
+      const writeCommentBlock = this.$el.querySelector('.write-form');
       const replyBlock = this.$el.querySelector('.write-reply');
       const replyBlockText = this.$el.querySelector('.write-reply__comment');
       const replyBlockContainer = this.$el.querySelector('.write-reply__container');
+      this.currentAnswer = comment.id;
       const replyLayout = `
         <div class="reply-comment">
            <p class="aside-text">
@@ -149,12 +151,20 @@ export default {
            <div class="reply-place__text">${comment.value}</div>
         </div>
       `;
-      replyBlockText.innerHTML = replyLayout;
       
-      replyBlock.scrollIntoView();
+      writeCommentBlock.scrollIntoView();
+      replyBlockText.innerHTML = replyLayout;
+      replyBlockContainer.style.height = replyBlock.scrollHeight + 25 + 'px';
+    },
+    
+    cancelWriteReply() {
+      const replyBlockText = this.$el.querySelector('.write-reply__comment');
+      const replyBlockContainer = this.$el.querySelector('.write-reply__container');
+      replyBlockContainer.style.height = '0px';
+      this.currentAnswer = '';
       setTimeout(() => {
-        replyBlockContainer.style.height = replyBlock.scrollHeight + 'px';
-      }, 1000)
+        replyBlockText.innerHTML = ''
+      }, 600)
     },
 
     sendComment() {
@@ -181,7 +191,10 @@ export default {
               resolve();
             }).then(() => {
               nextTick(() => {
-                this.currentCommentText = ''
+                this.currentCommentText = '';
+                if (this.currentAnswer !== '') {
+                  this.cancelWriteReply()
+                }
               })
             })
           })
