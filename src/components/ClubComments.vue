@@ -1,13 +1,15 @@
 <template>
   <div>
     <h2>Комментарии участников</h2>
+
     <div class="comment__section">
+
       <div class="comment__list">
         <div v-if="!noComments" class="project-info message-block">
           <h4 style="margin-bottom: 0">Комментариев пока нет</h4>
         </div>
         <div v-else>
-          <section class="comment" v-for="comment in this.commentsData" :key="comment.id">
+          <section class="comment hidden-comment" v-for="comment in this.commentsData" :key="comment.id" :id="`comment_${comment.id}`">
             <div class="comment__content">
               <div class="comment__body">
                 <div class="comment__user">
@@ -130,20 +132,40 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters(['getData', 'getUserInfo', 'getGlobals']),
-  },
+  watch: {
+    commentsData() {
+      nextTick(() => {
+        let newComment = this.currentCommentText !== '' ? true : false;
+        for (let comment in this.commentsData) {
+          const commentNode = this.$el.querySelector(`#comment_${comment}`);
+          if (commentNode.classList.contains('hidden-comment')) {
+            commentNode.style.height = commentNode.scrollHeight + 'px';
+            setTimeout(() => {
+              commentNode.classList.remove('hidden-comment');
+              if (newComment) {
+                window.scroll(0, document.body.scrollHeight);
+                commentNode.classList.add('highlighted');
+              }
+            }, 300)
+          }
+        }
+      })
+    }
+},
 
-  methods: {
-    ...mapActions(['sendRequest', 'getUserPayment']),
+computed: {
+  ...mapGetters(['getData', 'getUserInfo', 'getGlobals']),
+},
 
-    writeReply(comment) {
-      const writeCommentBlock = this.$el.querySelector('.write-form');
-      const replyBlock = this.$el.querySelector('.write-reply');
-      const replyBlockText = this.$el.querySelector('.write-reply__comment');
-      const replyBlockContainer = this.$el.querySelector('.write-reply__container');
-      this.currentAnswer = comment.id;
-      const replyLayout = `
+methods: {
+  ...mapActions(['sendRequest', 'getUserPayment']),
+
+  writeReply(comment) {
+    const replyBlock = this.$el.querySelector('.write-reply');
+    const replyBlockText = this.$el.querySelector('.write-reply__comment');
+    const replyBlockContainer = this.$el.querySelector('.write-reply__container');
+    this.currentAnswer = comment.id;
+    replyBlockText.innerHTML = `
         <div class="reply-comment">
            <p class="aside-text">
               <b>${comment.accountEmail}</b> написал:
@@ -151,88 +173,86 @@ export default {
            <div class="reply-place__text">${comment.value}</div>
         </div>
       `;
-      
-      writeCommentBlock.scrollIntoView();
-      replyBlockText.innerHTML = replyLayout;
-      replyBlockContainer.style.height = replyBlock.scrollHeight + 25 + 'px';
-    },
-    
-    cancelWriteReply() {
-      const replyBlockText = this.$el.querySelector('.write-reply__comment');
-      const replyBlockContainer = this.$el.querySelector('.write-reply__container');
-      replyBlockContainer.style.height = '0px';
-      this.currentAnswer = '';
-      setTimeout(() => {
-        replyBlockText.innerHTML = ''
-      }, 600)
-    },
+    replyBlockContainer.style.height = replyBlock.scrollHeight + 30 + 'px';
+  },
 
-    sendComment() {
-      const body = {
-        'value': this.currentCommentText,
-      }
+  cancelWriteReply() {
+    const replyBlockText = this.$el.querySelector('.write-reply__comment');
+    const replyBlockContainer = this.$el.querySelector('.write-reply__container');
+    replyBlockContainer.style.height = '0px';
+    this.currentAnswer = '';
+    setTimeout(() => {
+      replyBlockText.innerHTML = ''
+    }, 600)
+  },
 
-      if (this.currentAnswer !== null) {
-        body.answered = this.currentAnswer;
-      }
+  sendComment() {
+    const body = {
+      'value': this.currentCommentText,
+    }
 
-      const sendCommentRequest = {
-        method: 'POST',
-        requestURL: `/v1/club/${this.$props.clubId}/comment`,
-        headers: this.getGlobals.headers,
-        body: JSON.stringify(body),
-        stateTarget: [`club-${this.$props.clubId}_content`, 'tempComment',],
-      }
-      this.sendRequest(sendCommentRequest)
-          .then(() => {
-            return new Promise(resolve => {
-              const newComment = this.getData([`club-${this.$props.clubId}_content`, 'tempComment']);
-              this.$set(this.$store.state[`club-${this.$props.clubId}_content`].comments, newComment.id, newComment);
-              resolve();
-            }).then(() => {
-              nextTick(() => {
-                this.currentCommentText = '';
-                if (this.currentAnswer !== '') {
-                  this.cancelWriteReply()
-                }
-              })
+    if (this.currentAnswer !== null) {
+      body.answered = this.currentAnswer;
+    }
+
+    const sendCommentRequest = {
+      method: 'POST',
+      requestURL: `/v1/club/${this.$props.clubId}/comment`,
+      headers: this.getGlobals.headers,
+      body: JSON.stringify(body),
+      stateTarget: [`club-${this.$props.clubId}_content`, 'tempComment',],
+    }
+    this.sendRequest(sendCommentRequest)
+        .then(() => {
+          return new Promise(resolve => {
+            const newComment = this.getData([`club-${this.$props.clubId}_content`, 'tempComment']);
+            this.$set(this.commentsData, newComment.id, newComment);
+            resolve();
+          }).then(() => {
+            nextTick(() => {
+              this.currentCommentText = '';
+              if (this.currentAnswer !== '') {
+                this.cancelWriteReply();
+              }
             })
           })
-    }
-  },
-
-  created() {
-    fetch(`${this.getGlobals.siteName}/v1/club/${this.$props.clubId}/payment`, {
-      method: 'GET',
-      credentials: 'include',
-    }).then(response => {
-      response.json()
-          .then(data => {
-            if (data.status === 'CONFIRMED') {
-              this.userInClub = true;
-            } else {
-              this.userInClub = false;
-            }
-          })
-    });
-
-    const commentsDataRequest = {
-      method: 'GET',
-      requestURL: `/v1/club/${this.$props.clubId}/comments`,
-      headers: this.getGlobals.headers,
-      stateTarget: [`club-${this.$props.clubId}_content`, 'comments'],
-    };
-
-    this.sendRequest(commentsDataRequest).then(() => {
-      this.commentsData = this.getData([`club-${this.$props.clubId}_content`, 'comments']);
-      if (Object.keys(this.commentsData).length === 0) {
-        this.noComments = false;
-      }
-    });
-  },
-  mounted() {
-    window.scroll(0, 0);
+        })
   }
+}
+,
+
+mounted() {
+  fetch(`${this.getGlobals.siteName}/v1/club/${this.$props.clubId}/payment`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then(response => {
+    response.json()
+        .then(data => {
+          if (data.status === 'CONFIRMED') {
+            this.userInClub = true;
+          } else {
+            this.userInClub = false;
+          }
+        })
+  });
+
+  const commentsDataRequest = {
+    method: 'GET',
+    requestURL: `/v1/club/${this.$props.clubId}/comments`,
+    headers: this.getGlobals.headers,
+    stateTarget: [`club-${this.$props.clubId}_content`, 'comments'],
+  };
+
+  this.sendRequest(commentsDataRequest).then(() => {
+    this.commentsData = this.getData([`club-${this.$props.clubId}_content`, 'comments']);
+    if (Object.keys(this.commentsData).length === 0) {
+      this.
+      this.noComments = false;
+    }
+  });
+
+  window.scroll(0, 0);
+}
 }
 </script>)
 
